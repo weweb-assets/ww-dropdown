@@ -32,82 +32,61 @@ export default {
     },
     dropdownStyle() {
       const style = {};
+      const { position, alignment } = this.content;
+      const { width, height } = this.coordinates;
 
-      switch (this.content.position) {
-        case 'top':
-          if (this.content.offsetY === undefined) {
-            style['bottom'] = this.coordinates.height + "px";
-          } else {
-            style['bottom'] = `calc(${this.coordinates.height + "px"} + ${this.content.offsetY})`;
-          }
-          style['--offsetX'] = "0"
-          style['--offsetY'] = "16px"
-          break;
-        case 'bottom':
-          if (this.content.offsetY === undefined) {
-            style['top'] = this.coordinates.height + "px";
-          } else {
-            style['top'] = `calc(${this.coordinates.height + "px"} + ${this.content.offsetY})`;
-          }
-          style['--offsetX'] = "0"
-          style['--offsetY'] = "-16px"
-          break;
-        case 'left':
-          if (this.content.offsetX === undefined) {
-            style['right'] = this.coordinates.width + "px";
-          } else {
-            style['right'] = `calc(${this.coordinates.width + "px"}  + ${this.content.offsetX})`;
-          }
-          style['--offsetX'] = "16px"
-          style['--offsetY'] = "0"
-          break;
-        case 'right':
-          if (this.content.offsetX === undefined) {
-            style['left'] = this.coordinates.width + "px";
-          } else {
-            style['left'] = `calc(${this.coordinates.width + "px"}  + ${this.content.offsetX})`;
-          }
-          // style['transformOrigin'] = "center left"
-          style['--offsetX'] = "-16px"
-          style['--offsetY'] = "0"
-          break;
+      const offsetX = this.content.offsetX !== undefined ? parseInt(this.content.offsetX) : 0;
+      const offsetY = this.content.offsetY !== undefined ? parseInt(this.content.offsetY) : 0;
+
+      const setStyles = (position) => {
+        if (position === 'top' || position === 'bottom') {
+          style[position] = height + offsetY + 'px';
+        } else {
+          style[position] = width + offsetX + 'px';
+        }
+      };
+
+      function getOppositeSide(side) {
+        const transformations = {
+          'top': 'bottom',
+          'bottom': 'top',
+          'left': 'right',
+          'right': 'left'
+        };
+
+        return transformations[side];
       }
 
-      switch (this.content.alignment) {
+      setStyles(getOppositeSide(position));
+
+      switch (alignment) {
         case 'start':
-          if (this.content.position === 'top' || this.content.position === 'bottom') {
-            style['left'] = this.content.offsetX === undefined ? "0px" : this.content.offsetX;
+          if (position === 'top' || position === 'bottom') {
+            style['left'] = offsetX + 'px';
           } else {
-            style['top'] = 0;
+            style['top'] = offsetY + 'px';
           }
           break;
         case 'center':
-          if (this.content.position === 'top' || this.content.position === 'bottom') {
-            if (this.content.offsetX === undefined) {
-              style['left'] = this.coordinates.width / 2 + "px";
-            } else {
-              style['left'] = `calc( ${this.coordinates.width / 2 + "px"} + ${this.content.offsetX})`;
-            }
+          if (position === 'top' || position === 'bottom') {
+            style['left'] = width / 2 + offsetX + 'px';
             style['transform'] = 'translate(-50%, 0px)';
           } else {
-            style['top'] = this.coordinates.height / 2 + "px";
+            style['top'] = height / 2 + offsetY + 'px';
             style['transform'] = 'translate(0px, -50%)';
           }
           break;
         case 'end':
-          if (this.content.position === 'top' || this.content.position === 'bottom') {
-            style['right'] = this.content.offsetX === undefined ? "0px" : this.content.offsetX;;
+          if (position === 'top' || position === 'bottom') {
+            style['right'] = offsetX + 'px';
           } else {
-            style['bottom'] = 0;
+            style['bottom'] = -1 * offsetY + 'px';
           }
           break;
       }
 
       return style;
     }
-  },
-  watch: {
-
   },
   beforeMount() {
     wwLib.getFrontDocument().addEventListener('click', this.handleClickOutside);

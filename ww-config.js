@@ -99,10 +99,7 @@ export default {
         fr: "Taille",
       },
       options: {
-        unitChoices: [
-          { value: "px", label: "px", min: 1, max: 1000 },
-          { value: "%", label: "%", min: 1, max: 100 },
-        ],
+        unitChoices: [{ value: "px", label: "px", min: 1, max: 1000 }],
       },
     },
     triggerLayout: {
@@ -135,7 +132,7 @@ export default {
       type: "Button",
       editorOnly: true,
       options: {
-        text: { en: "Toggle edition" },
+        text: { en: "Toggle" },
         color: "blue",
         action: "toggleEdit",
       },
