@@ -3,7 +3,7 @@
     <div ref="dropdownElement" @click="handleClick" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut">
       <wwLayout class="layout content-layout" path="triggerLayout"/>
     </div>
-      <wwLayout v-if="isOpened" class="layout content-layout dropdown" :style="dropdownStyle" path="dropdownLayout" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut"/>
+      <wwLayout v-if="isOpened || this.content.forceDisplayEditor" class="layout content-layout dropdown" :style="dropdownStyle" path="dropdownLayout" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut"/>
   </div>
 </template>
 
@@ -96,17 +96,15 @@ export default {
     updatePosition() {
       this.coordinates = this.$refs.dropdownElement.getBoundingClientRect();
     },
-    toggleDropdown() {
-      this.isOpened = !this.isOpened;
-      this.updatePosition();
-    },
-    toggleEdit() {
-      this.toggleDropdown();
-    },
     handleClick() {
       if (this.content.triggerType === 'click' || this.wwFrontState.screenSize !== 'default') {
         this.updatePosition();
         if (!this.content.disabled) this.isOpened = !this.isOpened;
+      }
+    },
+    handleClickOutside() {
+      if (!this.isMouseInside && (this.content.triggerType === 'click' || this.wwFrontState.screenSize !== 'default')) {
+        if (!this.content.disabled) this.isOpened = false;
       }
     },
     handleHoverIn() {
@@ -126,11 +124,6 @@ export default {
       } else {
         this.isMouseInside = false;
       }
-    },
-    handleClickOutside() {
-      if (!this.isMouseInside && (this.content.triggerType === 'click' || this.wwFrontState.screenSize !== 'default')) {
-        if (!this.content.disabled) this.isOpened = false;
-      }
     }
   }
 };
@@ -139,8 +132,6 @@ export default {
 <style lang="scss" scoped>
 .dropdown {
   position: absolute;
-  // animation: fade-in 2s ease;
-  // transform-origin: top left;
 }
 
 @keyframes fade-in {

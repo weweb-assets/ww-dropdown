@@ -1,9 +1,9 @@
 export default {
   editor: {
     label: {
-      en: "My Element",
+      en: "Dropdown",
     },
-    icon: "chevron-down",
+    icon: "navigator-dropdown",
     navigator: {
       groups: ["Trigger", "Dropdown"],
     },
@@ -90,6 +90,7 @@ export default {
           { value: "px", label: "px", min: 1, max: 1000 },
           { value: "%", label: "%", min: 1, max: 100 },
         ],
+        noRange: true,
       },
     },
     offsetY: {
@@ -99,7 +100,11 @@ export default {
         fr: "Taille",
       },
       options: {
-        unitChoices: [{ value: "px", label: "px", min: 1, max: 1000 }],
+        unitChoices: [
+          { value: "px", label: "px", min: 1, max: 1000 },
+          { value: "%", label: "%", min: 1, max: 100 },
+        ],
+        noRange: true,
       },
     },
     triggerLayout: {
@@ -128,14 +133,11 @@ export default {
         tooltip: "A boolean that defines the disabled state`",
       },
     },
-    toggleEdit: {
-      type: "Button",
-      editorOnly: true,
-      options: {
-        text: { en: "Toggle" },
-        color: "blue",
-        action: "toggleEdit",
-      },
+    forceDisplayEditor: {
+      type: "OnOff",
+      label: {
+        en: "Force display in editor",
+      }
     },
   },
 };
