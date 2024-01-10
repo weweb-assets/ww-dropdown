@@ -3,9 +3,7 @@
     <div ref="dropdownElement" @click="handleClick" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut">
       <wwLayout class="layout content-layout" path="triggerLayout"/>
     </div>
-    <div ref="dropdownContent" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut">
-      <wwLayout v-if="isOpened" class="layout content-layout dropdown" :style="dropdownStyle" path="dropdownLayout"/>
-    </div>
+      <wwLayout v-if="isOpened" class="layout content-layout dropdown" :style="dropdownStyle" path="dropdownLayout" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut"/>
   </div>
 </template>
 
