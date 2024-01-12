@@ -3,7 +3,7 @@
     <div ref="dropdownElement" @click="handleClick" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut">
       <wwLayout class="layout content-layout" path="triggerLayout"/>
     </div>
-      <wwLayout v-if="isOpened || this.content.forceDisplayEditor" class="layout content-layout dropdown" :style="dropdownStyle" path="dropdownLayout" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut"/>
+    <wwLayout v-if="isOpened || this.content.forceDisplayEditor" class="layout content-layout dropdown" :style="dropdownStyle" path="dropdownLayout" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut"/>
   </div>
 </template>
 
@@ -23,10 +23,12 @@ export default {
     };
   },
   computed: {
-    textStyle() {
-      return {
-        color: this.content.textColor,
-      };
+    isEditing() {
+        /* wwEditor:start */
+        return this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION;
+        /* wwEditor:end */
+        // eslint-disable-next-line no-unreachable
+        return false;
     },
     dropdownStyle() {
       const style = {};
@@ -43,17 +45,6 @@ export default {
           style[position] = width + offsetX + 'px';
         }
       };
-
-      function getOppositeSide(side) {
-        const transformations = {
-          'top': 'bottom',
-          'bottom': 'top',
-          'left': 'right',
-          'right': 'left'
-        };
-
-        return transformations[side];
-      }
 
       setStyles(getOppositeSide(position));
 
@@ -92,12 +83,15 @@ export default {
   mounted() {
     this.updatePosition();
   },
+  unmounted(){
+    clearTimeout(this.timeoutId);
+  },
   methods: {
     updatePosition() {
       this.coordinates = this.$refs.dropdownElement.getBoundingClientRect();
     },
     handleClick() {
-      if (this.content.triggerType === 'click' || this.wwFrontState.screenSize !== 'default') {
+      if (this.content.triggerType === 'click' || this.wwFrontState.screenSize !== 'default' && !isEditing) {
         this.updatePosition();
         if (!this.content.disabled) this.isOpened = !this.isOpened;
       }
@@ -108,7 +102,7 @@ export default {
       }
     },
     handleHoverIn() {
-      if (this.content.triggerType === 'hover' && this.wwFrontState.screenSize === 'default') {
+      if (this.content.triggerType === 'hover' && this.wwFrontState.screenSize === 'default' && !isEditing) {
         this.updatePosition();
         clearTimeout(this.timeoutId);
         if (!this.content.disabled) this.isOpened = true;
@@ -124,6 +118,16 @@ export default {
       } else {
         this.isMouseInside = false;
       }
+    },
+    getOppositeSide(side){
+      const transformations = {
+          'top': 'bottom',
+          'bottom': 'top',
+          'left': 'right',
+          'right': 'left'
+        };
+
+        return transformations[side];
     }
   }
 };
@@ -132,17 +136,5 @@ export default {
 <style lang="scss" scoped>
 .dropdown {
   position: absolute;
-}
-
-@keyframes fade-in {
-  0% {
-    transform: translate(var(--offsetX), var(--offsetY));
-    transform: scale(0.0);
-    opacity: 0;
-  }
-
-  100% {
-    opacity: 1;
-  }
 }
 </style>
