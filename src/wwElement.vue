@@ -92,7 +92,7 @@ export default {
       this.coordinates = this.$refs.dropdownElement.getBoundingClientRect();
     },
     handleClick() {
-      if (this.content.triggerType === 'click' || this.wwFrontState.screenSize !== 'default' && !isEditing) {
+      if (this.content.triggerType === 'click' || this.wwFrontState.screenSize !== 'default' && !this.isEditing) {
         this.updatePosition();
         if (!this.content.disabled) this.isOpened = !this.isOpened;
       }
@@ -103,7 +103,7 @@ export default {
       }
     },
     handleHoverIn() {
-      if (this.content.triggerType === 'hover' && this.wwFrontState.screenSize === 'default' && !isEditing) {
+      if (this.content.triggerType === 'hover' && this.wwFrontState.screenSize === 'default' && !this.isEditing) {
         this.updatePosition();
         clearTimeout(this.timeoutId);
         if (!this.content.disabled) this.isOpened = true;
