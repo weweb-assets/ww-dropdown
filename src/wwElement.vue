@@ -47,7 +47,7 @@ export default {
         }
       };
 
-      setStyles(getOppositeSide(position));
+      setStyles(this.getOppositeSide(position));
 
       switch (alignment) {
         case 'start':
