@@ -3,7 +3,7 @@
     <div ref="dropdownElement" @click="handleClick" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut">
       <wwLayout class="layout content-layout" path="triggerLayout"/>
     </div>
-    <wwLayout v-if="isOpened || this.content.forceDisplayEditor" class="layout content-layout dropdown" :style="dropdownStyle" path="dropdownLayout" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut"/>
+    <wwLayout v-if="isOpened || (this.content.forceDisplayEditor && this.isEditing)" class="layout content-layout dropdown" :style="dropdownStyle" path="dropdownLayout" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut"/>
   </div>
 </template>
 
@@ -12,15 +12,26 @@ export default {
   props: {
     content: { type: Object, required: true },
     wwFrontState: { type: Object, required: true },
+    wwEditorState: { type: Object, required: true },
   },
   data() {
     return {
       isOpened: false,
-      coordinates: 0,
+      coordinates: { width: 0, height: 0},
       dropdownSize: 0,
       isMouseInside: false,
-      timeoutId: 0
+      timeoutId: 0,
+      resizeObserver: null,
     };
+  },
+  watch: {
+    'content.triggerLayout': {
+      handler(newVal, oldVal) {
+        // Do something when triggerLayout changes
+        console.log('TriggerLayout changed:', newVal);
+      },
+      deep: true, // Enable deep watching
+    },
   },
   computed: {
     isEditing() {
@@ -46,7 +57,7 @@ export default {
         }
       };
 
-      setStyles(getOppositeSide(position));
+      setStyles(this.getOppositeSide(position));
 
       switch (alignment) {
         case 'start':
@@ -81,18 +92,19 @@ export default {
     wwLib.getFrontDocument().addEventListener('click', this.handleClickOutside);
   },
   mounted() {
-    this.updatePosition();
+    const resizeObserver = new ResizeObserver(this.handleResize);
+    const containerElement = this.$refs.dropdownElement;
+    resizeObserver.observe(containerElement);
   },
   unmounted(){
     clearTimeout(this.timeoutId);
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+    }
   },
   methods: {
-    updatePosition() {
-      this.coordinates = this.$refs.dropdownElement.getBoundingClientRect();
-    },
     handleClick() {
-      if (this.content.triggerType === 'click' || this.wwFrontState.screenSize !== 'default' && !isEditing) {
-        this.updatePosition();
+      if (this.content.triggerType === 'click' || this.wwFrontState.screenSize !== 'default' && !this.isEditing) {
         if (!this.content.disabled) this.isOpened = !this.isOpened;
       }
     },
@@ -102,8 +114,7 @@ export default {
       }
     },
     handleHoverIn() {
-      if (this.content.triggerType === 'hover' && this.wwFrontState.screenSize === 'default' && !isEditing) {
-        this.updatePosition();
+      if (this.content.triggerType === 'hover' && this.wwFrontState.screenSize === 'default' && !this.isEditing) {
         clearTimeout(this.timeoutId);
         if (!this.content.disabled) this.isOpened = true;
       } else {
@@ -128,7 +139,12 @@ export default {
         };
 
         return transformations[side];
-    }
+    },
+    handleResize(entries) {
+      const entry = entries[0];
+      this.coordinates.width = entry.contentRect.width;
+      this.coordinates.height = entry.contentRect.height;
+    },
   }
 };
 </script>

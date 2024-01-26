@@ -85,6 +85,7 @@ export default {
         en: "Offset (x)",
         fr: "Taille",
       },
+      bindable: true,
       options: {
         unitChoices: [
           { value: "px", label: "px", min: 1, max: 1000 },
@@ -92,6 +93,10 @@ export default {
         ],
         noRange: true,
       },
+      bindingValidation: {
+        type: 'string',
+        tooltip: 'A string that defines size of offset in px or %',
+      }
     },
     offsetY: {
       type: "Length",
@@ -99,6 +104,7 @@ export default {
         en: "Offset (y)",
         fr: "Taille",
       },
+      bindable: true,
       options: {
         unitChoices: [
           { value: "px", label: "px", min: 1, max: 1000 },
@@ -106,6 +112,10 @@ export default {
         ],
         noRange: true,
       },
+      bindingValidation: {
+        type: 'string',
+        tooltip: 'A string that defines size of offset in px or %',
+      }
     },
     triggerLayout: {
       hidden: true,
