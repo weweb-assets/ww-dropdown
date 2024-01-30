@@ -44,16 +44,18 @@ export default {
     dropdownStyle() {
       const style = {};
       const { position, alignment } = this.content;
-      const { width, height } = this.coordinates;
+      const width = this.coordinates.width + 'px';
+      const height = this.coordinates.height + 'px';
 
-      const offsetX = this.content.offsetX !== undefined ? parseInt(this.content.offsetX) : 0;
-      const offsetY = this.content.offsetY !== undefined ? parseInt(this.content.offsetY) : 0;
+      const offsetX = this.content.offsetX !== undefined ? this.content.offsetX : '0px';
+      const offsetY = this.content.offsetY !== undefined ? this.content.offsetY : '0px';
 
       const setStyles = (position) => {
         if (position === 'top' || position === 'bottom') {
-          style[position] = height + offsetY + 'px';
+          style[position] = `calc(${height} + ${offsetY})`;
+          // height + offsetY + 'px';
         } else {
-          style[position] = width + offsetX + 'px';
+          style[position] = `calc(${width} + ${offsetX})`;
         }
       };
 
@@ -62,25 +64,25 @@ export default {
       switch (alignment) {
         case 'start':
           if (position === 'top' || position === 'bottom') {
-            style['left'] = offsetX + 'px';
+            style['left'] = offsetX;
           } else {
-            style['top'] = offsetY + 'px';
+            style['top'] = offsetY;
           }
           break;
         case 'center':
           if (position === 'top' || position === 'bottom') {
-            style['left'] = width / 2 + offsetX + 'px';
+            style['left'] = `calc((${width} / 2) + ${offsetX})`
             style['transform'] = 'translate(-50%, 0px)';
           } else {
-            style['top'] = height / 2 + offsetY + 'px';
+            style['top'] = `calc(${height} / 2 + ${offsetY})`
             style['transform'] = 'translate(0px, -50%)';
           }
           break;
         case 'end':
           if (position === 'top' || position === 'bottom') {
-            style['right'] = offsetX + 'px';
+            style['right'] = offsetX;
           } else {
-            style['bottom'] = -1 * offsetY + 'px';
+            style['bottom'] = `calc(-1 * ${offsetY})`;
           }
           break;
       }
@@ -106,6 +108,7 @@ export default {
     handleClick() {
       if (this.content.triggerType === 'click' || this.wwFrontState.screenSize !== 'default' && !this.isEditing) {
         if (!this.content.disabled) this.isOpened = !this.isOpened;
+        console.log(this.content.offsetX)
       }
     },
     handleClickOutside() {

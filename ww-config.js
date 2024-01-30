@@ -92,6 +92,7 @@ export default {
           { value: "%", label: "%", min: 1, max: 100 },
         ],
         noRange: true,
+        useVar: true,
       },
       bindingValidation: {
         type: 'string',
@@ -111,6 +112,7 @@ export default {
           { value: "%", label: "%", min: 1, max: 100 },
         ],
         noRange: true,
+        useVar: true,
       },
       bindingValidation: {
         type: 'string',
