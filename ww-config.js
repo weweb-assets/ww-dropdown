@@ -19,6 +19,7 @@ export default {
         options: [
           { value: "click", label: { en: "Click" } },
           { value: "hover", label: { en: "Hover" } },
+          { value: "right-click", label: { en: "Right click" } }
         ],
       },
     },
@@ -137,6 +138,18 @@ export default {
       type: "OnOff",
       label: {
         en: "Disabled",
+      },
+      bindable: true,
+      /* wwEditor:start */
+      bindingValidation: {
+        type: "boolean",
+        tooltip: "A boolean that defines the disabled state`",
+      },
+    },
+    animated: {
+      type: "OnOff",
+      label: {
+        en: "Animated",
       },
       bindable: true,
       /* wwEditor:start */
