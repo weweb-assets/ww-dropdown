@@ -155,7 +155,7 @@ export default {
       /* wwEditor:start */
       bindingValidation: {
         type: "boolean",
-        tooltip: "A boolean that defines the disabled state`",
+        tooltip: "A boolean that defines whether element is animated",
       },
     },
     forceDisplayEditor: {
