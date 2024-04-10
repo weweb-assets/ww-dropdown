@@ -134,6 +134,17 @@ export default {
         group: "Dropdown",
       },
     },
+    dropdownZIndex: {
+      label: 'Z-index Dropdown',
+      type: 'Number',
+      options: {
+        min: 0,
+        max: 100,
+      },
+      responsive: true,
+      states: true,
+      classes: true,
+  },
     disabled: {
       type: "OnOff",
       label: {

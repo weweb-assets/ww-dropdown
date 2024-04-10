@@ -3,7 +3,7 @@
     <div ref="dropdownElement" @click="handleClick" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut" @contextmenu.prevent="handleRightClick">
       <wwLayout class="layout content-layout" path="triggerLayout"/>
     </div>
-    <div :style="style" class="dropdown">
+    <div :style="style" class="dropdown" ww-responsive="dropdown">
       <div @mouseenter="handleHoverIn" @mouseleave="handleHoverOut" >
         <Transition :name="this.content.animated ? 'slide' : ''">
           <wwLayout v-if="isOpened || (this.content.forceDisplayEditor && this.isEditing)" path="dropdownLayout"/>
@@ -123,6 +123,8 @@ export default {
           }
           break;
       }
+
+      style['z-index'] = this.content.dropdownZIndex || 'unset';
 
       return style;
     },
