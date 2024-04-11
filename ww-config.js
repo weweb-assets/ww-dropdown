@@ -135,7 +135,7 @@ export default {
       },
     },
     dropdownZIndex: {
-      label: 'Z-index Dropdown',
+      label: 'Dropdown z-index',
       type: 'Number',
       options: {
         min: 0,
@@ -144,7 +144,13 @@ export default {
       responsive: true,
       states: true,
       classes: true,
-  },
+      bindable: true,
+      /* wwEditor:start */
+      bindingValidation: {
+        type: "number",
+        tooltip: "A number that defines the Z-index of the dropdown.",
+      },
+    },
     disabled: {
       type: "OnOff",
       label: {
