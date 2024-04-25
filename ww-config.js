@@ -134,6 +134,23 @@ export default {
         group: "Dropdown",
       },
     },
+    dropdownZIndex: {
+      label: 'Dropdown z-index',
+      type: 'Number',
+      options: {
+        min: 0,
+        max: 100,
+      },
+      responsive: true,
+      states: true,
+      classes: true,
+      bindable: true,
+      /* wwEditor:start */
+      bindingValidation: {
+        type: "number",
+        tooltip: "A number that defines the Z-index of the dropdown.",
+      },
+    },
     disabled: {
       type: "OnOff",
       label: {
