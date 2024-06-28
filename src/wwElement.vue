@@ -150,10 +150,10 @@ export default {
       }
     },
     closeDropdown() {
-      this.open = false;
+      this.isOpened = false;
     },
     openDropdown() {
-      this.open = false;
+      this.isOpened = false;
     },
     handleClickOutside() {
       if (!this.isMouseInside && ((this.content.triggerType === 'click' || this.content.triggerType === 'right-click') || this.wwFrontState.screenSize !== 'default')) {
