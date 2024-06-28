@@ -150,6 +150,12 @@ export default {
         console.log(this.style)
       }
     },
+    closeDropdown() {
+      this.open = false;
+    },
+    openDropdown() {
+      this.open = false;
+    },
     handleClickOutside() {
       if (!this.isMouseInside && ((this.content.triggerType === 'click' || this.content.triggerType === 'right-click') || this.wwFrontState.screenSize !== 'default')) {
         if (!this.content.disabled) this.isOpened = false;
