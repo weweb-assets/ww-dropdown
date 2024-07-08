@@ -152,9 +152,6 @@ export default {
     closeDropdown() {
       this.isOpened = false;
     },
-    openDropdown() {
-      this.isOpened = false;
-    },
     handleClickOutside() {
       if (!this.isMouseInside && ((this.content.triggerType === 'click' || this.content.triggerType === 'right-click') || this.wwFrontState.screenSize !== 'default')) {
         if (!this.content.disabled) this.isOpened = false;

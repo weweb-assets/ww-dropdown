@@ -8,8 +8,7 @@ export default {
       groups: ["Trigger", "Dropdown"],
     },
   },
-  actions: [{ label: 'Close dropdown', action: 'closeDropdown' },
-  { label: 'Open dropdown', action: 'openDropdown' }],
+  actions: [{ label: 'Close dropdown', action: 'closeDropdown' }],
   properties: {
     triggerType: {
       label: {
