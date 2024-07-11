@@ -147,8 +147,10 @@ export default {
     handleClick() {
       if (this.content.triggerType === 'click' || this.wwFrontState.screenSize !== 'default' && !this.isEditing) {
         if (!this.content.disabled) this.isOpened = !this.isOpened;
-        console.log(this.style)
       }
+    },
+    closeDropdown() {
+      this.isOpened = false;
     },
     handleClickOutside() {
       if (!this.isMouseInside && ((this.content.triggerType === 'click' || this.content.triggerType === 'right-click') || this.wwFrontState.screenSize !== 'default')) {
