@@ -8,7 +8,7 @@ export default {
       groups: ["Trigger", "Dropdown"],
     },
   },
-  actions: [{ label: 'Close dropdown', action: 'closeDropdown' }],
+  actions: [{ label: "Close dropdown", action: "closeDropdown" }],
   properties: {
     triggerType: {
       label: {
@@ -20,7 +20,7 @@ export default {
         options: [
           { value: "click", label: { en: "Click" } },
           { value: "hover", label: { en: "Hover" } },
-          { value: "right-click", label: { en: "Right click" } }
+          { value: "right-click", label: { en: "Right click" } },
         ],
       },
     },
@@ -97,9 +97,9 @@ export default {
         useVar: true,
       },
       bindingValidation: {
-        type: 'string',
-        tooltip: 'A string that defines size of offset in px or %',
-      }
+        type: "string",
+        tooltip: "A string that defines size of offset in px or %",
+      },
     },
     offsetY: {
       type: "Length",
@@ -117,9 +117,9 @@ export default {
         useVar: true,
       },
       bindingValidation: {
-        type: 'string',
-        tooltip: 'A string that defines size of offset in px or %',
-      }
+        type: "string",
+        tooltip: "A string that defines size of offset in px or %",
+      },
     },
     triggerLayout: {
       hidden: true,
@@ -136,8 +136,8 @@ export default {
       },
     },
     dropdownZIndex: {
-      label: 'Dropdown z-index',
-      type: 'Number',
+      label: "Dropdown z-index",
+      type: "Number",
       options: {
         min: 0,
         max: 100,
@@ -180,7 +180,51 @@ export default {
       type: "OnOff",
       label: {
         en: "Force display in editor",
-      }
+      },
+    },
+  },
+  triggerContainer: {
+    hidden: true,
+    defaultValue: {
+      isWwObject: true,
+      type: "ww-flexbox",
+      name: "Trigger container",
+      content: {
+        children: [
+          {
+            isWwObject: true,
+            type: "ww-text",
+            content: { text: { en: "Select a value" } },
+          },
+          {
+            isWwObject: true,
+            type: "ww-icon",
+            content: { icon: "fas fa-caret-down", color: "#000000" },
+          },
+        ],
+      },
+    },
+  },
+  dropdownContainer: {
+    hidden: true,
+    defaultValue: {
+      isWwObject: true,
+      type: "ww-flexbox",
+      name: "Dropdown container",
+      content: {
+        children: [
+          {
+            isWwObject: true,
+            type: "ww-text",
+            content: { text: { en: "Select a value" } },
+          },
+          {
+            isWwObject: true,
+            type: "ww-icon",
+            content: { icon: "fas fa-caret-down", color: "#000000" },
+          },
+        ],
+      },
     },
   },
 };

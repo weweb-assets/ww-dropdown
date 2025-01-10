@@ -1,19 +1,34 @@
 <template>
-  <div style="position: relative;">
-    <div ref="dropdownElement" @click="handleClick" @mouseenter="handleHoverIn" @mouseleave="handleHoverOut" @contextmenu.prevent="handleRightClick">
-      <wwLayout class="layout content-layout" path="triggerLayout"/>
+  <div style="position: relative">
+    <div
+      ref="triggerElement"
+      @click="handleClick"
+      @mouseenter="handleHoverIn"
+      @mouseleave="handleHoverOut"
+      @contextmenu.prevent="handleRightClick"
+    >
+      <wwElement class="ww-select-trigger" v-bind="content.triggerContainer" />
     </div>
-    <div :style="style" class="dropdown" ww-responsive="dropdown">
-      <div @mouseenter="handleHoverIn" @mouseleave="handleHoverOut" >
-        <Transition :name="this.content.animated ? 'slide' : ''">
-          <wwLayout v-if="isOpened || (this.content.forceDisplayEditor && this.isEditing)" path="dropdownLayout"/>
-        </Transition>
-      </div>
+
+    <div
+      :style="floatingStyles"
+      class="dropdown"
+      ww-responsive="dropdown"
+      ref="dropdownElement"
+      @mouseenter="handleHoverIn"
+      @mouseleave="handleHoverOut"
+    >
+      <wwElement
+        v-if="isOpened || (this.content.forceDisplayEditor && this.isEditing)"
+        v-bind="content.dropdownLayout"
+      />
     </div>
-</div>
+  </div>
 </template>
 
 <script>
+import useDropdownFloating from "./composables/useFloating";
+
 export default {
   props: {
     content: { type: Object, required: true },
@@ -30,107 +45,27 @@ export default {
       resizeObserver: null,
     };
   },
+  setup(props) {
+    const { floatingStyles, syncFloating } = useDropdownFloating(
+      triggerElement,
+      dropdownElement
+    );
+
+    return { floatingStyles, syncFloating };
+  },
   computed: {
     isEditing() {
       /* wwEditor:start */
-      return this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION;
+      return (
+        this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION
+      );
       /* wwEditor:end */
       // eslint-disable-next-line no-unreachable
       return false;
     },
-    style() {
-      const style = {};
-      const { position, alignment } = this.content;
-      const width = this.coordinates.width + 'px';
-      const height = this.coordinates.height + 'px';
-
-      const offsetX = this.content.offsetX !== undefined ? this.content.offsetX : '0px';
-      const offsetY = this.content.offsetY !== undefined ? this.content.offsetY : '0px';
-
-      const setStyles = (position) => {
-        if (position === 'top' || position === 'bottom') {
-          style[position] = `calc(${height} + ${offsetY})`;
-        } else {
-          style[position] = `calc(${width} + ${offsetX})`;
-        }
-      };
-
-      setStyles(this.getOppositeSide(position));
-
-      if (this.content.animated) {
-        switch (position) {
-          case 'top':
-            style['--slideOriginY'] = offsetY;
-            break;
-          case 'bottom':
-            style['--slideOriginY'] = `calc(-1 * ${offsetY})`;
-            style['--slideOriginX'] = '0px';
-            break;
-          case 'left':
-            style['--slideOriginX'] = offsetX;
-            style['--slideOriginY'] = '0px';
-            break;
-          case 'right':
-            style['--slideOriginX'] = `calc(-1 * ${offsetX})`;
-            style['--slideOriginY'] = '0px';
-            break;
-        }
-      }
-
-      switch (alignment) {
-        case 'start':
-          if (position === 'top' || position === 'bottom') {
-            if (this.content.animated) {
-              style['--transformOrigin'] = this.getOppositeSide(position) + ' left';
-            }
-            style['left'] = offsetX;
-            style['--slideOriginX'] = '-' + offsetX;
-          } else {
-            if (this.content.animated) {
-              style['--transformOrigin'] = 'top ' + this.getOppositeSide(position);
-            }
-            style['top'] = offsetY;
-          }
-          break;
-        case 'center':
-          if (position === 'top' || position === 'bottom') {
-            if (this.content.animated) {
-              style['--transformOrigin'] = this.getOppositeSide(position) + ' center';
-            }
-            style['transform'] = `translateX( calc(-50% + (${width} / 2) + ${offsetX}))`
-            style['--slideOriginX'] = `0px`;
-          } else {
-            if (this.content.animated) {
-              style['--transformOrigin'] = 'center ' + this.getOppositeSide(position);
-            }
-            style['transform'] = `translateY( calc(-50% - (${height} / 2) + ${offsetY}))`
-            // style['top'] = `0`
-            style['--slideOriginY'] = `calc(-0.5 * ((${width} / 2) + ${offsetX}))`;
-          }
-          break;
-        case 'end':
-          if (position === 'top' || position === 'bottom') {
-            if (this.content.animated) {
-              style['--transformOrigin'] = 'center'
-            }
-            style['right'] = offsetX;
-            style['--slideOriginX'] = offsetX;
-          } else {
-            if (this.content.animated) {
-              style['--transformOrigin'] = 'bottom ' + this.getOppositeSide(position);
-            }
-            style['bottom'] = `calc(-1 * ${offsetY})`;
-          }
-          break;
-      }
-
-      style['z-index'] = this.content.dropdownZIndex || 'unset';
-
-      return style;
-    },
   },
   beforeMount() {
-    wwLib.getFrontDocument().addEventListener('click', this.handleClickOutside);
+    wwLib.getFrontDocument().addEventListener("click", this.handleClickOutside);
   },
   mounted() {
     const resizeObserver = new ResizeObserver(this.handleResize);
@@ -145,7 +80,10 @@ export default {
   },
   methods: {
     handleClick() {
-      if (this.content.triggerType === 'click' || this.wwFrontState.screenSize !== 'default' && !this.isEditing) {
+      if (
+        this.content.triggerType === "click" ||
+        (this.wwFrontState.screenSize !== "default" && !this.isEditing)
+      ) {
         if (!this.content.disabled) this.isOpened = !this.isOpened;
       }
     },
@@ -153,12 +91,21 @@ export default {
       this.isOpened = false;
     },
     handleClickOutside() {
-      if (!this.isMouseInside && ((this.content.triggerType === 'click' || this.content.triggerType === 'right-click') || this.wwFrontState.screenSize !== 'default')) {
+      if (
+        !this.isMouseInside &&
+        (this.content.triggerType === "click" ||
+          this.content.triggerType === "right-click" ||
+          this.wwFrontState.screenSize !== "default")
+      ) {
         if (!this.content.disabled) this.isOpened = false;
       }
     },
     handleHoverIn() {
-      if (this.content.triggerType === 'hover' && this.wwFrontState.screenSize === 'default' && !this.isEditing) {
+      if (
+        this.content.triggerType === "hover" &&
+        this.wwFrontState.screenSize === "default" &&
+        !this.isEditing
+      ) {
         clearTimeout(this.timeoutId);
         if (!this.content.disabled) this.isOpened = true;
       } else {
@@ -166,7 +113,7 @@ export default {
       }
     },
     handleHoverOut() {
-      if (this.content.triggerType === 'hover') {
+      if (this.content.triggerType === "hover") {
         this.timeoutId = setTimeout(() => {
           if (!this.content.disabled) this.isOpened = false;
         }, 200);
@@ -175,16 +122,19 @@ export default {
       }
     },
     handleRightClick() {
-      if (this.content.triggerType === 'right-click' || this.wwFrontState.screenSize !== 'default' && !this.isEditing) {
+      if (
+        this.content.triggerType === "right-click" ||
+        (this.wwFrontState.screenSize !== "default" && !this.isEditing)
+      ) {
         if (!this.content.disabled) this.isOpened = !this.isOpened;
       }
     },
     getOppositeSide(side) {
       const transformations = {
-        'top': 'bottom',
-        'bottom': 'top',
-        'left': 'right',
-        'right': 'left'
+        top: "bottom",
+        bottom: "top",
+        left: "right",
+        right: "left",
       };
 
       return transformations[side];
@@ -194,8 +144,7 @@ export default {
       this.coordinates.width = entry.contentRect.width;
       this.coordinates.height = entry.contentRect.height;
     },
-
-  }
+  },
 };
 </script>
 
