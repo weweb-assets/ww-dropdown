@@ -156,7 +156,7 @@ export default {
     matchWidth: {
       label: { en: "Match widths" },
       type: "OnOff",
-      defaultValue: "false",
+      defaultValue: false,
       bindable: true,
       /* wwEditor:start */
       bindingValidation: {
