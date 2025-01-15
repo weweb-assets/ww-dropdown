@@ -209,17 +209,11 @@ export default {
       () => props.content.matchWidth,
       (newValue) => {
         if (newValue) {
-          middleware.value.push(
-            size({
-              apply({ rects, elements }) {
-                elements.floating.style.width = props.content.matchWidth
-                  ? `${rects.reference.width}px`
-                  : "auto";
-              },
-            })
-          );
+          dropdownElement.value.$el.style.width = getBoundingClientRect(
+            triggerElement.value.$el
+          ).width;
         } else {
-          if (middleware.value.length == 4) middleware.value.pop();
+          dropdownElement.value.$el.style.width = "auto";
         }
       }
     );
