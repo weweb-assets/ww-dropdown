@@ -157,6 +157,10 @@ export default {
       return `${side}-${align}`;
     });
 
+    const size = computed(() =>
+      props.content.matchWidth ? `${rects.reference.width}px` : "auto"
+    );
+
     const middleware = computed(() => [
       offset({
         mainAxis: parseFloat(props.content.mainAxisOffset) || 0,
@@ -164,15 +168,6 @@ export default {
       }),
       flip({ padding: parseFloat(props.content.boundOffset) || 0 }),
       shift({ padding: 0 }),
-      size({
-        apply({ rects, elements }) {
-          Object.assign(elements.floating.style, {
-            width: props.content.matchWidth
-              ? `${rects.reference.width}px`
-              : "auto",
-          });
-        },
-      }),
     ]);
 
     const { floatingStyles, updateFloating: update } = useFloating(
@@ -214,9 +209,21 @@ export default {
       () => props.content.matchWidth,
       (newValue) => {
         if (newValue) {
+          middleware.value.push(
+            size({
+              apply({ rects, elements }) {
+                elements.floating.style.width = props.content.matchWidth
+                  ? `${rects.reference.width}px`
+                  : "auto";
+              },
+            })
+          );
+        } else {
+          if ((middleware.value.length = 3)) middleware.value.pop();
         }
       }
     );
+
     /* wwEditor:end */
 
     wwLib.wwElement.useRegisterElementLocalContext(
