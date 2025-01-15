@@ -211,7 +211,7 @@ export default {
         if (newValue) {
           const rect = triggerElement.value.getBoundingClientRect();
           console.log(rect);
-          dropdownElement.value.style.width = rect.width;
+          dropdownElement.value.style.width = rect.width + "px";
         } else {
           dropdownElement.value.style.width = "auto";
         }
