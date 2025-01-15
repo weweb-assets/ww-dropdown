@@ -8,222 +8,230 @@ export default {
       groups: ["Trigger", "Dropdown"],
     },
   },
-  actions: [{ label: "Close dropdown", action: "closeDropdown" }],
+  triggerEvents: [
+    {
+      name: "open",
+      label: {
+        en: "On open",
+        fr: "À l'ouverture",
+      },
+    },
+    {
+      name: "close",
+      label: {
+        en: "On close",
+        fr: "À la fermeture",
+      },
+    },
+  ],
+  actions: [
+    {
+      label: "Toggle",
+      action: "toggleDropdown",
+    },
+    {
+      label: "Open",
+      action: "openDropdown",
+    },
+    {
+      label: "Close",
+      action: "closeDropdown",
+    },
+  ],
   properties: {
-    triggerType: {
-      label: {
-        en: "Trigger",
-      },
-      type: "TextSelect",
-      defaultValue: "click",
+    toggleDialog: {
+      type: "Button",
+      editorOnly: true,
+      bindable: true,
       options: {
-        options: [
-          { value: "click", label: { en: "Click" } },
-          { value: "hover", label: { en: "Hover" } },
-          { value: "right-click", label: { en: "Right click" } },
-        ],
+        text: { en: "Toggle" },
+        action: "toggleDropdown",
       },
     },
-    position: {
-      label: {
-        en: "Position",
-      },
+    trigger: {
+      label: { en: "trigger" },
       type: "TextSelect",
+      bindable: true,
+      options: {
+        options: [
+          { value: "click", label: "Click" },
+          { value: "hover", label: "Hover" },
+          { value: "rightClick", label: "Right click" },
+        ],
+      },
       defaultValue: "bottom",
+      // hidden: content => content.autoPosition,
+    },
+    side: {
+      label: { en: "Side" },
+      type: "TextSelect",
+      bindable: true,
       options: {
         options: [
-          { value: "top", label: { en: "Top" } },
-          { value: "right", label: { en: "Right" } },
-          { value: "bottom", label: { en: "Bottom" } },
-          { value: "left", label: { en: "Left" } },
+          { value: "bottom", label: "Bottom" },
+          { value: "left", label: "Left" },
+          { value: "top", label: "Top" },
+          { value: "right", label: "Right" },
         ],
       },
+      defaultValue: "bottom",
+      // hidden: content => content.autoPosition,
     },
-    alignment: {
+    align: {
       label: { en: "Align" },
-      type: "TextRadioGroup",
-      options: (content) => {
-        if (content.position === "top" || content.position === "bottom") {
-          return {
-            choices: [
-              {
-                value: "start",
-                title: { en: "Start" },
-                icon: "align-left",
-              },
-              {
-                value: "center",
-                title: { en: "Center" },
-                icon: "align-center",
-              },
-              { value: "end", title: { en: "End" }, icon: "align-right" },
-            ],
-          };
-        } else {
-          return {
-            choices: [
-              {
-                value: "start",
-                title: { en: "Start" },
-                icon: "align-y-start",
-              },
-              {
-                value: "center",
-                title: { en: "Center" },
-                icon: "align-y-center",
-              },
-              { value: "end", title: { en: "End" }, icon: "align-y-end" },
-            ],
-          };
-        }
+      type: "TextSelect",
+      bindable: true,
+      options: {
+        options: [
+          { value: "start", label: "Start" },
+          { value: "center", label: "Center" },
+          { value: "end", label: "End" },
+        ],
       },
       defaultValue: "start",
-      classes: true,
-      states: true,
+      // hidden: content => content.autoPosition,
     },
-    offsetX: {
+    mainAxisOffset: {
+      label: { en: "Side offset" },
       type: "Length",
-      label: {
-        en: "Offset (x)",
-        fr: "Taille",
-      },
-      bindable: true,
       options: {
-        unitChoices: [
-          { value: "px", label: "px", min: 1, max: 1000 },
-          { value: "%", label: "%", min: 1, max: 100 },
-        ],
-        noRange: true,
-        useVar: true,
+        unitChoices: [{ value: "px", label: "px", min: -100, max: 100 }],
       },
-      bindingValidation: {
-        type: "string",
-        tooltip: "A string that defines size of offset in px or %",
-      },
-    },
-    offsetY: {
-      type: "Length",
-      label: {
-        en: "Offset (y)",
-        fr: "Taille",
-      },
-      bindable: true,
-      options: {
-        unitChoices: [
-          { value: "px", label: "px", min: 1, max: 1000 },
-          { value: "%", label: "%", min: 1, max: 100 },
-        ],
-        noRange: true,
-        useVar: true,
-      },
-      bindingValidation: {
-        type: "string",
-        tooltip: "A string that defines size of offset in px or %",
-      },
-    },
-    triggerLayout: {
-      hidden: true,
-      defaultValue: [],
-      navigator: {
-        group: "Trigger",
-      },
-    },
-    dropdownLayout: {
-      hidden: true,
-      defaultValue: [],
-      navigator: {
-        group: "Dropdown",
-      },
-    },
-    dropdownZIndex: {
-      label: "Dropdown z-index",
-      type: "Number",
-      options: {
-        min: 0,
-        max: 100,
-      },
-      responsive: true,
-      states: true,
-      classes: true,
+      defaultValue: "0px",
       bindable: true,
       /* wwEditor:start */
       bindingValidation: {
-        type: "number",
-        tooltip: "A number that defines the Z-index of the dropdown.",
+        validations: [{ type: "number" }],
+        tooltip:
+          "The horizontal offset of the dropdown relative to the trigger. A number value: \n\n`4`, `8`, `12`, etc.",
       },
+      propertyHelp: {
+        tooltip:
+          "The horizontal offset of the dropdown relative to the trigger.",
+      },
+      /* wwEditor:end */
+    },
+    crossAxisOffset: {
+      label: { en: "Alignment offset" },
+      type: "Length",
+      options: {
+        unitChoices: [{ value: "px", label: "px", min: -100, max: 100 }],
+      },
+      defaultValue: "0px",
+      bindable: true,
+      /* wwEditor:start */
+      bindingValidation: {
+        validations: [{ type: "number" }],
+        tooltip:
+          "The vertical offset of the dropdown relative to the trigger. A number value: \n\n`4`, `8`, `12`, etc.",
+      },
+      propertyHelp: {
+        tooltip: "The vertical offset of the dropdown relative to the trigger.",
+      },
+      /* wwEditor:end */
+    },
+    boundOffset: {
+      label: { en: "Edge offset" },
+      type: "Length",
+      options: {
+        unitChoices: [
+          { value: "px", label: "px", min: 0, max: 100 },
+          { value: "%", label: "%", min: 0, max: 100 },
+        ],
+      },
+      defaultValue: "0px",
+      bindable: true,
+      /* wwEditor:start */
+      bindingValidation: {
+        validations: [{ type: "number" }],
+        tooltip:
+          "Offset to the edge of the screen when the dropdown should change the side to opposite when there is no space for it. A number value: \n\n`4`, `8`, `12`, etc.",
+      },
+      propertyHelp: {
+        tooltip:
+          "Offset to the edge of the screen when the dropdown should change the side to opposite when there is no space for it.",
+      },
+      /* wwEditor:end */
+    },
+    matchWidth: {
+      label: { en: "Match widths" },
+      type: "OnOff",
+      defaultValue: "false",
+      bindable: true,
+      /* wwEditor:start */
+      bindingValidation: {
+        validations: [{ type: "boolean" }],
+      },
+      /* wwEditor:end */
     },
     disabled: {
+      label: { en: "Match widths" },
       type: "OnOff",
-      label: {
-        en: "Disabled",
-      },
+      defaultValue: false,
       bindable: true,
       /* wwEditor:start */
       bindingValidation: {
-        type: "boolean",
-        tooltip: "A boolean that defines the disabled state`",
+        validations: [{ type: "boolean" }],
       },
+      /* wwEditor:end */
     },
-    animated: {
+    preventInteractionsOutside: {
+      label: { en: "Prevent interactions outside" },
       type: "OnOff",
-      label: {
-        en: "Animated",
-      },
+      defaultValue: false,
       bindable: true,
       /* wwEditor:start */
       bindingValidation: {
-        type: "boolean",
-        tooltip: "A boolean that defines whether element is animated",
+        validations: [{ type: "boolean" }],
       },
+      /* wwEditor:end */
     },
-    forceDisplayEditor: {
+    preventScroll: {
+      label: { en: "Prevent scrolling" },
       type: "OnOff",
-      label: {
-        en: "Force display in editor",
+      defaultValue: false,
+      bindable: true,
+      /* wwEditor:start */
+      bindingValidation: {
+        validations: [{ type: "boolean" }],
+      },
+      /* wwEditor:end */
+    },
+    clickOutsideCloses: {
+      label: { en: "Click outside closes" },
+      type: "OnOff",
+      defaultValue: false,
+      bindable: true,
+      /* wwEditor:start */
+      bindingValidation: {
+        validations: [{ type: "boolean" }],
+      },
+      /* wwEditor:end */
+    },
+    dropdownContent: {
+      hidden: true,
+      defaultValue: [],
+    },
+    triggerContainer: {
+      hidden: true,
+      defaultValue: {
+        isWwObject: true,
+        type: "ww-flexbox",
+        name: "Trigger",
+        content: {
+          children: [],
+        },
       },
     },
-  },
-  triggerContainer: {
-    hidden: true,
-    defaultValue: {
-      isWwObject: true,
-      type: "ww-flexbox",
-      name: "Trigger container",
-      content: {
-        children: [
-          {
-            isWwObject: true,
-            type: "ww-text",
-            content: { text: { en: "Select a value" } },
-          },
-          {
-            isWwObject: true,
-            type: "ww-icon",
-            content: { icon: "fas fa-caret-down", color: "#000000" },
-          },
-        ],
-      },
-    },
-  },
-  dropdownContainer: {
-    hidden: true,
-    defaultValue: {
-      isWwObject: true,
-      type: "ww-flexbox",
-      name: "Dropdown container",
-      content: {
-        children: [
-          {
-            isWwObject: true,
-            type: "ww-text",
-            content: { text: { en: "Select a value" } },
-          },
-          {
-            isWwObject: true,
-            type: "ww-icon",
-            content: { icon: "fas fa-caret-down", color: "#000000" },
-          },
-        ],
+    dropdownContainer: {
+      hidden: true,
+      defaultValue: {
+        isWwObject: true,
+        type: "ww-flexbox",
+        name: "Dropdown",
+        content: {
+          children: [],
+        },
       },
     },
   },

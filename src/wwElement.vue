@@ -1,174 +1,259 @@
 <template>
-  <div style="position: relative">
+  <div>
+    <div
+      v-if="!isEditing && content.preventInteractionsOutside && isOpen"
+      class="pointer-capture"
+      @click.stop="null"
+    ></div>
+
     <div
       ref="triggerElement"
       @click="handleClick"
-      @mouseenter="handleHoverIn"
-      @mouseleave="handleHoverOut"
       @contextmenu.prevent="handleRightClick"
+      @mouseenter="handleMouseEnter"
+      @mouseleave="handleMouseLeave"
     >
-      <wwElement class="ww-select-trigger" v-bind="content.triggerContainer" />
+      <wwElement v-bind="content.triggerContainer" />
     </div>
 
     <div
       :style="floatingStyles"
-      class="dropdown"
-      ww-responsive="dropdown"
       ref="dropdownElement"
-      @mouseenter="handleHoverIn"
-      @mouseleave="handleHoverOut"
+      v-if="isOpen"
+      @mouseenter="handleDropdownEnter"
+      @mouseleave="handleDropdownLeave"
     >
-      <wwElement
-        v-if="isOpened || (this.content.forceDisplayEditor && this.isEditing)"
-        v-bind="content.dropdownLayout"
-      />
+      <wwElement v-bind="content.dropdownContainer" />
     </div>
   </div>
 </template>
 
 <script>
-import useDropdownFloating from "./composables/useFloating";
+import { ref, computed, onBeforeUnmount, watch } from "vue";
+import {
+  useFloating,
+  autoUpdate,
+  flip,
+  offset,
+  shift,
+  size,
+} from "@floating-ui/vue";
+import { useClickOutside } from "./composables/handleClickOutside";
 
 export default {
   props: {
     content: { type: Object, required: true },
-    wwFrontState: { type: Object, required: true },
+    uid: { type: String, required: true },
+    /* wwEditor:start */
     wwEditorState: { type: Object, required: true },
+    /* wwEditor:end */
   },
-  data() {
-    return {
-      isOpened: false,
-      coordinates: { width: 0, height: 0 },
-      dropdownSize: 0,
-      isMouseInside: false,
-      timeoutId: 0,
-      resizeObserver: null,
-    };
-  },
-  setup(props) {
-    const { floatingStyles, syncFloating } = useDropdownFloating(
-      triggerElement,
-      dropdownElement
-    );
+  emits: ["trigger-event"],
+  setup(props, { emit }) {
+    // const isOpen = ref(false);
+    const triggerElement = ref(null);
+    const dropdownElement = ref(null);
+    const hoverTimeout = ref(null);
 
-    return { floatingStyles, syncFloating };
-  },
-  computed: {
-    isEditing() {
+    const { value: isOpen, setValue: setIsOpen } =
+      wwLib.wwVariable.useComponentVariable({
+        uid: props.uid,
+        name: "open",
+        type: "boolean",
+        defaultValue: false,
+        componentType: "element",
+      });
+
+    const isEditing = computed(() => {
       /* wwEditor:start */
       return (
-        this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION
+        props.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION
       );
       /* wwEditor:end */
       // eslint-disable-next-line no-unreachable
       return false;
-    },
-  },
-  beforeMount() {
-    wwLib.getFrontDocument().addEventListener("click", this.handleClickOutside);
-  },
-  mounted() {
-    const resizeObserver = new ResizeObserver(this.handleResize);
-    const containerElement = this.$refs.dropdownElement;
-    resizeObserver.observe(containerElement);
-  },
-  unmounted() {
-    clearTimeout(this.timeoutId);
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
-  },
-  methods: {
-    handleClick() {
-      if (
-        this.content.triggerType === "click" ||
-        (this.wwFrontState.screenSize !== "default" && !this.isEditing)
-      ) {
-        if (!this.content.disabled) this.isOpened = !this.isOpened;
-      }
-    },
-    closeDropdown() {
-      this.isOpened = false;
-    },
-    handleClickOutside() {
-      if (
-        !this.isMouseInside &&
-        (this.content.triggerType === "click" ||
-          this.content.triggerType === "right-click" ||
-          this.wwFrontState.screenSize !== "default")
-      ) {
-        if (!this.content.disabled) this.isOpened = false;
-      }
-    },
-    handleHoverIn() {
-      if (
-        this.content.triggerType === "hover" &&
-        this.wwFrontState.screenSize === "default" &&
-        !this.isEditing
-      ) {
-        clearTimeout(this.timeoutId);
-        if (!this.content.disabled) this.isOpened = true;
-      } else {
-        this.isMouseInside = true;
-      }
-    },
-    handleHoverOut() {
-      if (this.content.triggerType === "hover") {
-        this.timeoutId = setTimeout(() => {
-          if (!this.content.disabled) this.isOpened = false;
-        }, 200);
-      } else {
-        this.isMouseInside = false;
-      }
-    },
-    handleRightClick() {
-      if (
-        this.content.triggerType === "right-click" ||
-        (this.wwFrontState.screenSize !== "default" && !this.isEditing)
-      ) {
-        if (!this.content.disabled) this.isOpened = !this.isOpened;
-      }
-    },
-    getOppositeSide(side) {
-      const transformations = {
-        top: "bottom",
-        bottom: "top",
-        left: "right",
-        right: "left",
-      };
+    });
 
-      return transformations[side];
-    },
-    handleResize(entries) {
-      const entry = entries[0];
-      this.coordinates.width = entry.contentRect.width;
-      this.coordinates.height = entry.contentRect.height;
-    },
+    // Get trigger type from props or default to 'click'
+    const triggerType = computed(() => props.content.trigger || "click");
+
+    // Clear hover timeout on component unmount
+    onBeforeUnmount(() => {
+      if (hoverTimeout.value) clearTimeout(hoverTimeout.value);
+    });
+
+    function handleClick() {
+      if (props.content.trigger === "click" && !isEditing.value) {
+        toggleDropdown();
+      }
+    }
+
+    function handleRightClick(event) {
+      if (triggerType.value === "rightClick" && !isEditing.value) {
+        toggleDropdown();
+      }
+    }
+
+    function handleMouseEnter() {
+      if (triggerType.value === "hover" && !isEditing.value) {
+        clearTimeout(hoverTimeout.value);
+        openDropdown();
+      }
+    }
+
+    function handleMouseLeave() {
+      if (triggerType.value === "hover" && !isEditing.value) {
+        hoverTimeout.value = setTimeout(() => {
+          closeDropdown();
+        }, 150); // Small delay to allow moving to dropdown
+      }
+    }
+
+    function handleDropdownEnter() {
+      if (triggerType.value === "hover") {
+        clearTimeout(hoverTimeout.value);
+      }
+    }
+
+    function handleDropdownLeave() {
+      if (triggerType.value === "hover" && !isEditing.value) {
+        closeDropdown();
+      }
+    }
+
+    function openDropdown() {
+      setIsOpen(true);
+      emit("trigger-event", {
+        name: "open",
+      });
+    }
+
+    function closeDropdown() {
+      setIsOpen(false);
+      emit("trigger-event", {
+        name: "close",
+      });
+    }
+
+    function toggleDropdown() {
+      isOpen.value ? closeDropdown() : openDropdown();
+    }
+
+    useClickOutside(dropdownElement, handleClickOutside);
+
+    function handleClickOutside() {
+      if (
+        (triggerType.value === "click" || triggerType.value === "rightClick") &&
+        !isEditing.value &&
+        props.content.clickOutsideCloses
+      ) {
+        if (isOpen.value) closeDropdown();
+      }
+    }
+
+    const placement = computed(() => {
+      const side = props.content.side || "bottom";
+      const align = props.content.align || "start";
+      return `${side}-${align}`;
+    });
+
+    const middleware = computed(() => {
+      const middlewares = [
+        offset({
+          mainAxis: parseFloat(props.content.mainAxisOffset) || 0,
+          crossAxis: parseFloat(props.content.crossAxisOffset) || 0,
+        }),
+        flip({ padding: parseFloat(props.content.boundOffset) || 0 }),
+        shift({ padding: 0 }),
+      ];
+
+      if (props.content.matchWidth) {
+        middlewares.push(
+          size({
+            apply({ rects, elements }) {
+              Object.assign(elements.floating.style, {
+                width: `${rects.reference.width}px`,
+              });
+            },
+          })
+        );
+      }
+
+      return middlewares;
+    });
+
+    const { floatingStyles } = useFloating(triggerElement, dropdownElement, {
+      placement,
+      middleware,
+      // strategy: "fixed",
+      whileElementsMounted: autoUpdate,
+    });
+
+    watch(
+      () => isOpen.value,
+      (newValue) => {
+        if (props.content.preventScroll && !isEditing.value) {
+          const overflowValue = newValue ? "hidden" : "auto";
+          wwLib.getFrontDocument().body.style.overflow = overflowValue;
+          wwLib.getFrontDocument().documentElement.style.overflow =
+            overflowValue;
+        }
+      }
+    );
+
+    /* wwEditor:start */
+    watch(
+      () => isEditing.value,
+      (newValue) => {
+        if (props.content.preventScroll && isOpen.value && newValue) {
+          wwLib.getFrontDocument().body.style.overflow = "auto";
+          wwLib.getFrontDocument().documentElement.style.overflow = "auto";
+        }
+      }
+    );
+    /* wwEditor:end */
+
+    wwLib.wwElement.useRegisterElementLocalContext(
+      "dropdown",
+      ref({ isOpen }),
+      {
+        closeDropdown: {
+          method: closeDropdown,
+          editor: {
+            label: "Close",
+            description: "Close the dropdown.",
+          },
+        },
+      }
+    );
+
+    return {
+      floatingStyles,
+      isOpen,
+      toggleDropdown,
+      isEditing,
+      closeDropdown,
+      openDropdown,
+      triggerElement,
+      dropdownElement,
+      handleClick,
+      handleRightClick,
+      handleMouseEnter,
+      handleMouseLeave,
+      handleDropdownEnter,
+      handleDropdownLeave,
+    };
   },
 };
 </script>
 
 <style lang="scss" scoped>
-:root {
-  --slideOriginX: 0px;
-  --slideOriginY: 0px;
-  --transformOrigin: top left;
-}
-
-.dropdown {
-  position: absolute;
-  // transform: translateX(-50%)
-}
-
-.slide-enter-active,
-.slide-leave-active {
-  transition: all 0.2s ease;
-  transform-origin: var(--transformOrigin);
-}
-
-.slide-enter-from,
-.slide-leave-to {
-  opacity: 0;
-  transform: translate(var(--slideOriginX), var(--slideOriginY)) scale(0.1);
+.pointer-capture {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100dvw;
+  height: 100dvh;
+  pointer-events: auto;
 }
 </style>
