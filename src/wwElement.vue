@@ -157,37 +157,34 @@ export default {
       return `${side}-${align}`;
     });
 
-    const middleware = computed(() => {
-      const middlewares = [
-        offset({
-          mainAxis: parseFloat(props.content.mainAxisOffset) || 0,
-          crossAxis: parseFloat(props.content.crossAxisOffset) || 0,
-        }),
-        flip({ padding: parseFloat(props.content.boundOffset) || 0 }),
-        shift({ padding: 0 }),
-      ];
+    const middleware = computed(() => [
+      offset({
+        mainAxis: parseFloat(props.content.mainAxisOffset) || 0,
+        crossAxis: parseFloat(props.content.crossAxisOffset) || 0,
+      }),
+      flip({ padding: parseFloat(props.content.boundOffset) || 0 }),
+      shift({ padding: 0 }),
+      size({
+        apply({ rects, elements }) {
+          Object.assign(elements.floating.style, {
+            minWidth: props.content.matchWidth
+              ? `${rects.reference.width}px`
+              : "auto",
+          });
+        },
+      }),
+    ]);
 
-      if (props.content.matchWidth) {
-        middlewares.push(
-          size({
-            apply({ rects, elements }) {
-              Object.assign(elements.floating.style, {
-                width: `${rects.reference.width}px`,
-              });
-            },
-          })
-        );
+    const { floatingStyles, updateFloating: update } = useFloating(
+      triggerElement,
+      dropdownElement,
+      {
+        placement,
+        middleware,
+        // strategy: "fixed",
+        whileElementsMounted: autoUpdate,
       }
-
-      return middlewares;
-    });
-
-    const { floatingStyles } = useFloating(triggerElement, dropdownElement, {
-      placement,
-      middleware,
-      // strategy: "fixed",
-      whileElementsMounted: autoUpdate,
-    });
+    );
 
     watch(
       () => isOpen.value,
@@ -208,6 +205,14 @@ export default {
         if (props.content.preventScroll && isOpen.value && newValue) {
           wwLib.getFrontDocument().body.style.overflow = "auto";
           wwLib.getFrontDocument().documentElement.style.overflow = "auto";
+        }
+      }
+    );
+
+    watch(
+      () => props.content.matchWidth,
+      (newValue) => {
+        if (newValue) {
         }
       }
     );
