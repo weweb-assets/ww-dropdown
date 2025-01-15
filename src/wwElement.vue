@@ -209,9 +209,9 @@ export default {
       () => props.content.matchWidth,
       (newValue) => {
         if (newValue) {
-          console.log(dropdownElement);
-          dropdownElement.value.style.width =
-            triggerElement.value.getBoundingClientRect().width;
+          const rect = triggerElement.value.getBoundingClientRect();
+          console.log(rect);
+          dropdownElement.value.style.width = rect.width;
         } else {
           dropdownElement.value.style.width = "auto";
         }
