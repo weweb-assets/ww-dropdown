@@ -167,7 +167,7 @@ export default {
       size({
         apply({ rects, elements }) {
           Object.assign(elements.floating.style, {
-            minWidth: props.content.matchWidth
+            width: props.content.matchWidth
               ? `${rects.reference.width}px`
               : "auto",
           });
