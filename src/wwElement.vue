@@ -17,7 +17,7 @@
     </div>
 
     <div
-      :style="[floatingStyles, dropdownWidth]"
+      :style="[floatingStyles, { width: dropdownWidth }]"
       ref="dropdownElement"
       v-if="isOpen"
       @mouseenter="handleDropdownEnter"
