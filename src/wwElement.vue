@@ -209,15 +209,14 @@ export default {
       () => props.content.matchWidth,
       (newValue) => {
         if (newValue) {
-          dropdownElement.value.$el.style.width = getBoundingClientRect(
-            triggerElement.value.$el
-          ).width;
+          console.log("test");
+          dropdownElement.value.$el.style.width =
+            triggerElement.value.$el.getBoundingClientRect().width;
         } else {
           dropdownElement.value.$el.style.width = "auto";
         }
       }
     );
-
     /* wwEditor:end */
 
     wwLib.wwElement.useRegisterElementLocalContext(
