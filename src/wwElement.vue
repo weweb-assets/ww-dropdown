@@ -219,7 +219,7 @@ export default {
             })
           );
         } else {
-          if ((middleware.value.length = 3)) middleware.value.pop();
+          if (middleware.value.length == 4) middleware.value.pop();
         }
       }
     );
