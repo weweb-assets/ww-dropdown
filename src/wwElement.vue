@@ -189,6 +189,7 @@ export default {
     watch(
       () => isOpen.value,
       (newValue) => {
+        console.log(middleware);
         if (props.content.preventScroll && !isEditing.value) {
           const overflowValue = newValue ? "hidden" : "auto";
           wwLib.getFrontDocument().body.style.overflow = overflowValue;
