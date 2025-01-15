@@ -17,7 +17,7 @@
     </div>
 
     <div
-      :style="floatingStyles"
+      :style="[floatingStyles, dropdownWidth]"
       ref="dropdownElement"
       v-if="isOpen"
       @mouseenter="handleDropdownEnter"
@@ -157,8 +157,12 @@ export default {
       return `${side}-${align}`;
     });
 
-    const size = computed(() =>
-      props.content.matchWidth ? `${rects.reference.width}px` : "auto"
+    const triggerElementWidth = computed(
+      () => triggerElement.value.getBoundingClientRect().width + "px"
+    );
+
+    const dropdownWidth = computed(() =>
+      props.content.matchWidth ? triggerElementWidth.value : "auto"
     );
 
     const middleware = computed(() => [
@@ -204,19 +208,6 @@ export default {
         }
       }
     );
-
-    watch(
-      () => props.content.matchWidth,
-      (newValue) => {
-        if (newValue) {
-          const rect = triggerElement.value.getBoundingClientRect();
-          console.log(rect);
-          dropdownElement.value.style.width = rect.width + "px";
-        } else {
-          dropdownElement.value.style.width = "auto";
-        }
-      }
-    );
     /* wwEditor:end */
 
     wwLib.wwElement.useRegisterElementLocalContext(
@@ -242,6 +233,7 @@ export default {
       openDropdown,
       triggerElement,
       dropdownElement,
+      dropdownWidth,
       handleClick,
       handleRightClick,
       handleMouseEnter,
