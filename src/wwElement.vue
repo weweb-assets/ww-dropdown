@@ -210,10 +210,10 @@ export default {
       (newValue) => {
         if (newValue) {
           console.log(dropdownElement);
-          dropdownElement.value.$el.style.width =
-            triggerElement.value.$el.getBoundingClientRect().width;
+          dropdownElement.value.style.width =
+            triggerElement.value.getBoundingClientRect().width;
         } else {
-          dropdownElement.value.$el.style.width = "auto";
+          dropdownElement.value.style.width = "auto";
         }
       }
     );
