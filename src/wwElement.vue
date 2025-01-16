@@ -27,8 +27,8 @@
       @mouseenter="handleDropdownEnter"
       @mouseleave="handleDropdownLeave"
     >
-      <Transition mode="out-in" :name="transitionName" v-if="isOpen">
-        <div class="ww-dropdown-transition-root">
+      <Transition mode="out-in" :name="transitionName">
+        <div class="ww-dropdown-transition-root" v-if="isOpen">
           <wwElement v-bind="content.dropdownContainer" />
         </div>
       </Transition>
