@@ -75,8 +75,6 @@ export default {
       );
     });
 
-    getTransitionName(animationDuration, transitionName);
-
     const { value: isOpen, setValue: setIsOpen } =
       wwLib.wwVariable.useComponentVariable({
         uid: props.uid,
@@ -262,6 +260,8 @@ export default {
       handleMouseLeave,
       handleDropdownEnter,
       handleDropdownLeave,
+      transitionName,
+      animationDuration,
     };
   },
 };
