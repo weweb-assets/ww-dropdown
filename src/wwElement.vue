@@ -21,19 +21,18 @@
       <wwElement v-bind="content.triggerContainer" />
     </div>
 
-    <Transition mode="out-in" :name="transitionName">
-      <div
-        v-if="isOpen"
-        class="ww-dropdown-transition-root"
-        ref="dropdownElement"
-        @mouseenter="handleDropdownEnter"
-        @mouseleave="handleDropdownLeave"
-      >
-        <div :style="[floatingStyles, { width: dropdownWidth }]">
+    <div
+      :style="[floatingStyles, { width: dropdownWidth }]"
+      ref="dropdownElement"
+      @mouseenter="handleDropdownEnter"
+      @mouseleave="handleDropdownLeave"
+    >
+      <Transition mode="out-in" :name="transitionName" v-if="isOpen">
+        <div class="class=ww-dropdown-transition-root">
           <wwElement v-bind="content.dropdownContainer" />
         </div>
-      </div>
-    </Transition>
+      </Transition>
+    </div>
   </div>
 </template>
 
