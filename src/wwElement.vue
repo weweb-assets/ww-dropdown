@@ -25,12 +25,13 @@
       <div
         v-if="isOpen"
         class="ww-dropdown-transition-root"
-        :style="[floatingStyles, { width: dropdownWidth }]"
         ref="dropdownElement"
         @mouseenter="handleDropdownEnter"
         @mouseleave="handleDropdownLeave"
       >
-        <wwElement v-bind="content.dropdownContainer" />
+        <div :style="[floatingStyles, { width: dropdownWidth }]">
+          <wwElement v-bind="content.dropdownContainer" />
+        </div>
       </div>
     </Transition>
   </div>
@@ -200,7 +201,7 @@ export default {
       {
         placement,
         middleware,
-        transform: false,
+        // transform: false,
         whileElementsMounted: autoUpdate,
       }
     );
