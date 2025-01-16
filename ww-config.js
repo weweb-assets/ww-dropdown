@@ -153,6 +153,110 @@ export default {
       },
       /* wwEditor:end */
     },
+    animation: {
+      label: {
+        en: "Animation",
+        fr: "Animation",
+      },
+      section: "style",
+      type: "TextSelect",
+      options: {
+        options: [
+          { value: null, label: { en: "None", fr: "Aucune" } },
+          { value: "fade", label: { en: "Fade", fr: "Fondu" } },
+          { value: "slide-in", label: { en: "Slide in", fr: "Diapositive" } },
+          { value: "zoom", label: { en: "Zoom", fr: "Zoom" } },
+        ],
+      },
+      /* wwEditor:start */
+      bindingValidation: {
+        type: "string",
+        tooltip:
+          'A string matching one of the dialog animation types: "fade", "slide-in", "zoom" or null.',
+      },
+      /* wwEditor:end */
+      defaultValue: null,
+      bindable: true,
+    },
+    slideInDirection: {
+      hidden: (content) => content.animation !== "slide-in",
+      label: {
+        en: "Direction",
+        fr: "Direction",
+      },
+      type: "TextSelect",
+      section: "style",
+      options: {
+        options: [
+          { value: "top", label: { en: "Top", fr: "Haut" } },
+          { value: "left", label: { en: "Left", fr: "Gauche" } },
+          { value: "bottom", label: { en: "Bottom", fr: "Bas" } },
+          { value: "right", label: { en: "Right", fr: "Droite" } },
+        ],
+      },
+      /* wwEditor:start */
+      bindingValidation: {
+        type: "string",
+        tooltip:
+          'A string matching one of the slide in directions: "top", "left", "right" or "bottom".',
+      },
+      /* wwEditor:end */
+      defaultValue: "top",
+      bindable: true,
+    },
+    animationDuration: {
+      label: {
+        en: "Animation duration (ms)",
+        fr: "Durée de l'animation (ms)",
+      },
+      section: "style",
+      type: "Number",
+      defaultValue: 300,
+      options: {
+        min: 0,
+        max: 10000,
+      },
+      /* wwEditor:start */
+      bindingValidation: {
+        type: "number",
+        tooltip: "A number between 0 and 10000.",
+      },
+      /* wwEditor:end */
+      bindable: true,
+      hidden: (content) => content.animation === "none",
+    },
+    animationEasing: {
+      label: {
+        en: "Animation easing",
+        fr: "Animation easing",
+      },
+      section: "style",
+      type: "TextSelect",
+      options: {
+        options: [
+          { value: "linear", label: { en: "Linear", fr: "Linéaire" } },
+          { value: "ease", label: { en: "Ease", fr: "Acceleration" } },
+          {
+            value: "ease-in",
+            label: { en: "Ease in", fr: "Acceleration progressive" },
+          },
+          { value: "ease-out", label: { en: "Ease out", fr: "Deceleration" } },
+          {
+            value: "ease-in-out",
+            label: { en: "Ease in out", fr: "Acceleration et déclinaison" },
+          },
+        ],
+      },
+      /* wwEditor:start */
+      bindingValidation: {
+        type: "string",
+        tooltip:
+          'A string matching one of the dialog animation easing types: "linear", "ease", "ease-in", "ease-out" or "ease-in-out".',
+      },
+      /* wwEditor:end */
+      defaultValue: "linear",
+      bindable: true,
+    },
     matchWidth: {
       label: { en: "Match widths" },
       type: "OnOff",
@@ -165,7 +269,7 @@ export default {
       /* wwEditor:end */
     },
     disabled: {
-      label: { en: "Match widths" },
+      label: { en: "Disabled" },
       type: "OnOff",
       defaultValue: false,
       bindable: true,

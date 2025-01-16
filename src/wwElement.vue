@@ -1,5 +1,10 @@
 <template>
-  <div>
+  <div
+    :style="{
+      '--transition-duration': animationDuration,
+      '--transition-easing': content.animationEasing,
+    }"
+  >
     <div
       v-if="!isEditing && content.preventInteractionsOutside && isOpen"
       class="pointer-capture"
@@ -16,15 +21,18 @@
       <wwElement v-bind="content.triggerContainer" />
     </div>
 
-    <div
-      :style="[floatingStyles, { width: dropdownWidth }]"
-      ref="dropdownElement"
-      v-if="isOpen"
-      @mouseenter="handleDropdownEnter"
-      @mouseleave="handleDropdownLeave"
-    >
-      <wwElement v-bind="content.dropdownContainer" />
-    </div>
+    <Transition mode="out-in" :name="transitionName">
+      <div
+        :style="[floatingStyles, { width: dropdownWidth }]"
+        class="ww-dropdown-transition-root"
+        ref="dropdownElement"
+        v-if="isOpen"
+        @mouseenter="handleDropdownEnter"
+        @mouseleave="handleDropdownLeave"
+      >
+        <wwElement v-bind="content.dropdownContainer" />
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -39,6 +47,7 @@ import {
   size,
 } from "@floating-ui/vue";
 import { useClickOutside } from "./composables/handleClickOutside";
+import { getTransitionName } from "./composables/getTransitionName";
 
 export default {
   props: {
@@ -54,6 +63,19 @@ export default {
     const triggerElement = ref(null);
     const dropdownElement = ref(null);
     const hoverTimeout = ref(null);
+
+    const animationDuration = computed(() => {
+      return props.content.animationDuration + "ms";
+    });
+
+    const transitionName = computed(() => {
+      return getTransitionName(
+        props.content.animation,
+        props.content.slideInDirection
+      );
+    });
+
+    getTransitionName(animationDuration, transitionName);
 
     const { value: isOpen, setValue: setIsOpen } =
       wwLib.wwVariable.useComponentVariable({
@@ -246,6 +268,109 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.ww-dropdown-transition-root {
+  --translate-x: 0px;
+  --translate-y: 0px;
+  --translate-x-offset: 0px;
+  --translate-y-offset: 0px;
+  --scale: 1;
+  --calc-translate-x: calc(var(--translate-x) + var(--translate-x-offset));
+  --calc-translate-y: calc(var(--translate-y) + var(--translate-y-offset));
+  transition: transform var(--transition-duration) var(--transition-easing),
+    opacity var(--transition-duration) var(--transition-easing) !important;
+  transform: translateX(var(--calc-translate-x))
+    translateY(var(--calc-translate-y)) scaleX(var(--scale))
+    scaleY(var(--scale)) !important;
+}
+
+/* Fade Animation */
+.fade-transition-enter-from .ww-dropdown-transition-root,
+.fade-transition-leave-to .ww-dropdown-transition-root {
+  opacity: 0;
+}
+
+/* Slide-in left Animation */
+.slide-in-left-transition-enter-from .ww-dropdown-transition-root {
+  --translate-x-offset: -20px;
+  opacity: 0;
+}
+.slide-in-left-transition-enter-to .ww-dropdown-transition-root {
+  --translate-x-offset: 0;
+  opacity: 1;
+}
+.slide-in-left-transition-leave-from .ww-dropdown-transition-root {
+  --translate-x-offset: 0;
+  opacity: 1;
+}
+.slide-in-left-transition-leave-to .ww-dropdown-transition-root {
+  --translate-x-offset: -20px;
+  opacity: 0;
+}
+
+/* Slide-in right Animation */
+.slide-in-right-transition-enter-from .ww-dropdown-transition-root {
+  --translate-x-offset: 20px;
+  opacity: 0;
+}
+.slide-in-right-enter-to .ww-dropdown-transition-root {
+  --translate-x-offset: 0;
+  opacity: 1;
+}
+.slide-in-right-transition-leave-from .ww-dropdown-transition-root {
+  --translate-x-offset: 0;
+  opacity: 1;
+}
+.slide-in-right-transition-leave-to .ww-dropdown-transition-root {
+  --translate-x-offset: 20px;
+  opacity: 0;
+}
+
+/* Slide-in top Animation */
+.slide-in-top-transition-enter-from .ww-dropdown-transition-root {
+  --translate-y-offset: -20px;
+  opacity: 0;
+}
+.slide-in-top-enter-to .ww-dropdown-transition-root {
+  --translate-y-offset: 0;
+  opacity: 1;
+}
+.slide-in-top-transition-leave-from .ww-dropdown-transition-root {
+  --translate-y-offset: 0;
+  opacity: 1;
+}
+.slide-in-top-transition-leave-to .ww-dropdown-transition-root {
+  --translate-y-offset: -20px;
+  opacity: 0;
+}
+
+/* Slide-in bottom Animation */
+.slide-in-bottom-transition-enter-from .ww-dropdown-transition-root {
+  --translate-y-offset: 20px;
+  opacity: 0;
+}
+.slide-in-bottom-enter-to .ww-dropdown-transition-root {
+  --translate-y-offset: 0;
+  opacity: 1;
+}
+.slide-in-bottom-transition-leave-from .ww-dropdown-transition-root {
+  --translate-y-offset: 0;
+  opacity: 1;
+}
+.slide-in-bottom-transition-leave-to .ww-dropdown-transition-root {
+  --translate-y-offset: 20px;
+  opacity: 0;
+}
+
+/* Zoom Animation */
+.zoom-transition-enter-from .ww-dropdown-transition-root,
+.zoom-transition-leave-to .ww-dropdown-transition-root {
+  --scale: 0;
+}
+.zoom-transition-enter-to .ww-dropdown-transition-root,
+.zoom-transition-leave-from .ww-dropdown-transition-root {
+  --scale: 1;
+}
+
 .pointer-capture {
   position: fixed;
   top: 0;
