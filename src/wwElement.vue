@@ -200,7 +200,7 @@ export default {
       {
         placement,
         middleware,
-        strategy: "absolute",
+        transform: false,
         whileElementsMounted: autoUpdate,
       }
     );
