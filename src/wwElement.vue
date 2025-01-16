@@ -47,7 +47,7 @@ import {
   size,
 } from "@floating-ui/vue";
 import { useClickOutside } from "./composables/handleClickOutside";
-import { getTransitionName } from "./composables/getTransitionName";
+import getTransitionName from "./composables/getTransitionName";
 
 export default {
   props: {
