@@ -22,10 +22,9 @@
     </div>
 
     <Transition mode="out-in" :name="transitionName">
-      <div v-if="isOpen">
+      <div v-if="isOpen" class="ww-dropdown-transition-root">
         <div
           :style="[floatingStyles, { width: dropdownWidth }]"
-          class="ww-dropdown-transition-root"
           ref="dropdownElement"
           @mouseenter="handleDropdownEnter"
           @mouseleave="handleDropdownLeave"
