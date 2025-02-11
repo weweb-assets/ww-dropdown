@@ -40,8 +40,8 @@ Example:
 
 {"uid":"dropdown-element","tag":"ww-dropdown","props":{"default":{"offsetY":"8px","position":"bottom","alignment":"start","triggerType":"click","forceDisplayEditor":true}},"children":{"triggerLayout":[{"uid":"dropdown-trigger-layout"}],"dropdownLayout":[{"uid":"dropdown-layout"}]}}
 {"uid":"dropdown-trigger-layout","tag":"ww-button","props":{"default":{"disabled":false,"text":{"en":"<div>Click me</div>"}}},"styles":{"default":{"height":"38px","padding":"8px 16px","backgroundColor":"#000000","color":"#FFFFFF"}}}
-{"uid":"dropdown-layout","tag":"ww-flexbox","styles":{"default":{"width":"220px","padding":"8px","borderRadius":"12px"}},"children":{"children":[{"uid":"dropdown-layout-children"}]}}
-{"uid":"dropdown-layout-children","tag":"ww-flexbox","children":{"children":[{"uid":"layout-children-icon"},{"uid":"layout-children-text"}]}}
+{"uid":"dropdown-layout","tag":"ww-div","styles":{"default":{"width":"220px","padding":"8px","borderRadius":"12px"}},"children":{"children":[{"uid":"dropdown-layout-children"}]}}
+{"uid":"dropdown-layout-children","tag":"ww-div","children":{"children":[{"uid":"layout-children-icon"},{"uid":"layout-children-text"}]}}
 {"uid":"layout-children-icon","tag":"ww-icon","props":{"default":{"icon":"icon-user","fontSize":"16","color":"black"}}}
 {"uid":"layout-children-text","tag":"ww-text","props":{"default":{"text":{"en":"<div>Profile</div>"}}}}
 
