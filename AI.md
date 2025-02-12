@@ -8,6 +8,7 @@ keywords:
   - offsetx
   - offsety
   - dropdownzindex
+  - disabled
   - animated
   - forcedisplayeditor
   - closedropdown
@@ -22,16 +23,20 @@ Properties:
 - triggerType: 'click' | 'hover' | 'right-click' - Trigger type for opening. Default: "click"
 - position: 'top' | 'right' | 'bottom' | 'left' - Position relative to trigger. Default: "bottom"
 - alignment: 'start' | 'center' | 'end' - Alignment along position axis. Default: "start"
-- offsetX: string - Horizontal offset. Default: undefined
-- offsetY: string - Vertical offset. Default: undefined
-- dropdownZIndex: number - Z-index of dropdown. Default: undefined
+- offsetX: string - Horizontal offset in px or %. Default: undefined
+- offsetY: string - Vertical offset in px or %. Default: undefined
+- dropdownZIndex: number - Z-index of dropdown (0-100). Default: undefined
 - disabled: boolean - Disables dropdown. Default: undefined
 - animated: boolean - Enables animations. Default: undefined
 - forceDisplayEditor: boolean - Forces display in editor. Default: undefined
+- triggerLayout: Array - Hidden property for trigger element layout. Default: []
+- dropdownLayout: Array - Hidden property for dropdown content layout. Default: []
 
-Children:
-- triggerLayout: any - Trigger element layout
-- dropdownLayout: any - Dropdown content layout
+Properties Details:
+- offsetX and offsetY support binding with string values (px or %)
+- dropdownZIndex is responsive, supports states and classes, and can be bound to a number
+- alignment changes icon options based on position (horizontal/vertical alignment icons)
+- disabled and animated properties can be bound to boolean values
 
 Actions:
 - closeDropdown: Programmatically closes the dropdown
