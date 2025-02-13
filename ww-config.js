@@ -151,6 +151,7 @@ export default {
         type: "number",
         tooltip: "A number that defines the Z-index of the dropdown.",
       },
+      /* wwEditor:end */
     },
     disabled: {
       type: "OnOff",
@@ -163,6 +164,7 @@ export default {
         type: "boolean",
         tooltip: "A boolean that defines the disabled state`",
       },
+      /* wwEditor:end */
     },
     animated: {
       type: "OnOff",
@@ -175,6 +177,7 @@ export default {
         type: "boolean",
         tooltip: "A boolean that defines whether element is animated",
       },
+      /* wwEditor:end */
     },
     forceDisplayEditor: {
       type: "OnOff",
