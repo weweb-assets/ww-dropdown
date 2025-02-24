@@ -94,10 +94,8 @@ export default {
       return false;
     });
 
-    // Get trigger type from props or default to 'click'
     const triggerType = computed(() => props.content.trigger || "click");
 
-    // Clear hover timeout on component unmount
     onBeforeUnmount(() => {
       if (hoverTimeout.value) clearTimeout(hoverTimeout.value);
     });
@@ -200,7 +198,6 @@ export default {
       {
         placement,
         middleware,
-        // transform: false,
         whileElementsMounted: autoUpdate,
       }
     );
