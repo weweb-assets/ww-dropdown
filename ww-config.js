@@ -8,8 +8,20 @@ export default {
       groups: ["Trigger", "Dropdown"],
     },
   },
-  actions: [{ label: 'Close dropdown', action: 'closeDropdown' }],
+  actions: [
+    { label: 'Toggle dropdown', action: 'toggleDropdown' },
+    { label: 'Close dropdown', action: 'closeDropdown' },
+    { label: 'Toggle force open in editor', action: 'toggleForceOpenInEditor' },
+  ],
   properties: {
+    toggleDropdown: {
+      type: 'Button',
+      editorOnly: true,
+      options: {
+        text: { en: 'Toggle' },
+        action: 'toggleForceOpenInEditor',
+      },
+    },
     triggerType: {
       label: {
         en: "Trigger",
@@ -178,12 +190,6 @@ export default {
         tooltip: "A boolean that defines whether element is animated",
       },
       /* wwEditor:end */
-    },
-    forceDisplayEditor: {
-      type: "OnOff",
-      label: {
-        en: "Force display in editor",
-      }
     },
   },
 };
