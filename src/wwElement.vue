@@ -41,9 +41,6 @@ export default {
         };
     },
     computed: {
-        toggleForceOpenInEditor() {
-            this.forceOpenInEditor = !this.forceOpenInEditor;
-        },
         isEditing() {
             /* wwEditor:start */
             return this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION;
@@ -221,6 +218,9 @@ export default {
             const entry = entries[0];
             this.coordinates.width = entry.contentRect.width;
             this.coordinates.height = entry.contentRect.height;
+        },
+        toggleForceOpenInEditor() {
+            this.forceOpenInEditor = !this.forceOpenInEditor;
         },
     },
 };
