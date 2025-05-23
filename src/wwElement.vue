@@ -13,7 +13,7 @@
             <div @mouseenter="handleHoverIn" @mouseleave="handleHoverOut">
                 <Transition :name="this.content.animated ? 'slide' : ''">
                     <wwLayout
-                        v-if="isOpened || (this.content.forceDisplayEditor && this.isEditing)"
+                        v-if="isOpened || (forceOpenInEditor && isEditing)"
                         path="dropdownLayout"
                     />
                 </Transition>
@@ -37,6 +37,7 @@ export default {
             isMouseInside: false,
             timeoutId: 0,
             resizeObserver: null,
+            forceOpenInEditor: false,
         };
     },
     computed: {
@@ -162,6 +163,9 @@ export default {
                 if (!this.content.disabled) this.isOpened = !this.isOpened;
             }
         },
+        toggleDropdown() {
+            if (!this.content.disabled) this.isOpened = !this.isOpened;
+        },
         closeDropdown() {
             this.isOpened = false;
         },
@@ -214,6 +218,9 @@ export default {
             const entry = entries[0];
             this.coordinates.width = entry.contentRect.width;
             this.coordinates.height = entry.contentRect.height;
+        },
+        toggleForceOpenInEditor() {
+            this.forceOpenInEditor = !this.forceOpenInEditor;
         },
     },
 };
