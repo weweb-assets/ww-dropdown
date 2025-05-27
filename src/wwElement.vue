@@ -198,9 +198,9 @@ export default {
     wwLib.getFrontDocument().addEventListener("click", this.handleClickOutside);
   },
   mounted() {
-    const resizeObserver = new ResizeObserver(this.handleResize);
+    this.resizeObserver = new ResizeObserver(this.handleResize);
     const containerElement = this.$refs.dropdownElement;
-    resizeObserver.observe(containerElement);
+    this.resizeObserver.observe(containerElement);
   },
   unmounted() {
     clearTimeout(this.timeoutId);
