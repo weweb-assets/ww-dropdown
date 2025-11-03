@@ -1,7 +1,7 @@
 <template>
   <div style="position: relative">
     <div
-      ref="dropdownElement"
+      ref="triggerElement"
       @click="handleClick"
       @mouseenter="handleHoverIn"
       @mouseleave="handleHoverOut"
@@ -9,11 +9,16 @@
     >
       <wwLayout class="layout content-layout" path="triggerLayout" />
     </div>
-    <teleport :to="appDivRef">
-      <div :style="style" class="dropdown" ww-responsive="dropdown">
+    <teleport :to="appDiv" v-if="!delayedIsClosed">
+      <div
+        :style="style"
+        class="dropdown"
+        ww-responsive="dropdown"
+        ref="dropdownElement"
+      >
         <div @mouseenter="handleHoverIn" @mouseleave="handleHoverOut">
-          <Transition :name="this.content.animated ? 'slide' : ''">
-            <wwLayout v-if="isDisplayed" path="dropdownLayout" />
+          <Transition :name="content.animated ? 'slide' : ''">
+            <wwLayout v-if="delayedIsOpen" path="dropdownLayout" />
           </Transition>
         </div>
       </div>
@@ -22,31 +27,45 @@
 </template>
 
 <script>
-import { ref, useTemplateRef, onMounted } from "vue";
+import {
+  ref,
+  useTemplateRef,
+  onUnmounted,
+  computed,
+  watch,
+  nextTick,
+  onMounted,
+} from "vue";
 export default {
   props: {
     content: { type: Object, required: true },
     wwFrontState: { type: Object, required: true },
+    /* wwEditor:start */
     wwEditorState: { type: Object, required: true },
+    /* wwEditor:end */
   },
   data() {
     return {
-      isOpened: false,
-      coordinates: { width: 0, height: 0 },
       dropdownSize: 0,
-      isMouseInside: false,
-      timeoutId: 0,
-      resizeObserver: null,
     };
   },
-  setup() {
-    const appDivRef = wwLib.getFrontDocument().querySelector("#app");
-    const triggerOffsets = ref({ x: 0, y: 0 });
+  setup(props) {
+    const appDiv = wwLib.getFrontDocument().querySelector("#app");
+    const isEditing = computed(() => {
+      /* wwEditor:start */
+      return props.wwEditorState.isEditing;
+      /* wwEditor:end */
+      // eslint-disable-next-line no-unreachable
+      return false;
+    });
+    const triggerElementRef = useTemplateRef("triggerElement");
     const dropdownElementRef = useTemplateRef("dropdownElement");
-    const syncOffsets = () => {
-      if (!dropdownElementRef?.value) return;
-      const box = dropdownElementRef.value.getBoundingClientRect();
-      triggerOffsets.value = {
+
+    const triggerBox = ref({});
+    const synchronizeTriggerBox = () => {
+      if (!triggerElementRef?.value) return;
+      const box = triggerElementRef.value.getBoundingClientRect();
+      triggerBox.value = {
         left: box.left,
         right: box.right,
         top: box.top,
@@ -56,50 +75,152 @@ export default {
       };
     };
 
+    function onWindowClick(event) {
+      if (props.content.disabled) return;
+      if (
+        props.content.triggerType === "hover" &&
+        props.wwFrontState.screenSize === "default"
+      )
+        return;
+      if (
+        dropdownElementRef.value &&
+        dropdownElementRef.value.contains(event.target)
+      )
+        return;
+      if (
+        triggerElementRef.value &&
+        triggerElementRef.value.contains(event.target)
+      )
+        return;
+      isOpened.value = false;
+    }
+
+    const isOpened = ref(false);
+    const isDisplayed = computed(() => {
+      return (
+        isOpened.value || (props.content.forceDisplayEditor && isEditing.value)
+      );
+    });
+    const delayedIsOpen = ref(isDisplayed.value);
+    const delayedIsClosed = ref(!isDisplayed.value);
+
+    let resizeObserver = null;
+    let scrollableParents = [];
+
+    function setScrollableParents(element) {
+      scrollableParents = [];
+      let p = element.parentNode;
+      while (p && p !== wwLib.getFrontDocument().body) {
+        const s = wwLib.getFrontWindow().getComputedStyle(p);
+        if (
+          /(auto|scroll|overlay)/.test(s.overflow + s.overflowY + s.overflowX)
+        )
+          scrollableParents.push(p);
+        p = p.parentNode;
+      }
+      scrollableParents.push(wwLib.getFrontWindow());
+    }
+
+    function startPositioningDropdown() {
+      synchronizeTriggerBox();
+      wwLib.getFrontDocument().addEventListener("click", onWindowClick);
+      resizeObserver = new ResizeObserver((entries) => {
+        const entry = entries[0];
+        triggerBox.value.width = entry.contentRect;
+      });
+      resizeObserver.observe(triggerElementRef.value);
+      setScrollableParents(triggerElementRef.value);
+      scrollableParents.forEach((p) => {
+        p.addEventListener("scroll", synchronizeTriggerBox, { passive: true });
+        wwLib
+          .getFrontWindow()
+          .addEventListener("resize", synchronizeTriggerBox);
+      });
+    }
+
+    function stopPositioningDropdown() {
+      wwLib.getFrontDocument().removeEventListener("click", onWindowClick);
+      resizeObserver?.disconnect();
+      scrollableParents.forEach((p) => {
+        p.removeEventListener("scroll", synchronizeTriggerBox);
+        wwLib
+          .getFrontWindow()
+          .removeEventListener("resize", synchronizeTriggerBox);
+      });
+      scrollableParents = [];
+    }
+
+    watch(isDisplayed, (isDisplayed) => {
+      if (isDisplayed) {
+        startPositioningDropdown();
+        delayedIsClosed.value = false;
+        nextTick(() => {
+          delayedIsOpen.value = true;
+        });
+      } else {
+        stopPositioningDropdown();
+        delayedIsOpen.value = false;
+        nextTick(() => {
+          setTimeout(() => {
+            delayedIsClosed.value = true;
+          }, 250);
+        });
+      }
+    });
+
     onMounted(() => {
-      syncOffsets();
+      if (isDisplayed.value) {
+        startPositioningDropdown();
+      }
+    });
+
+    onUnmounted(() => {
+      stopPositioningDropdown();
     });
 
     return {
-      appDivRef,
-      syncOffsets,
-      triggerOffsets,
+      appDiv,
+      synchronizeTriggerBox,
+      triggerBox,
+      isOpened,
+      timeoutId: null,
+      isEditing,
+      isDisplayed,
+      delayedIsClosed,
+      delayedIsOpen,
     };
   },
   computed: {
-    isEditing() {
-      /* wwEditor:start */
-      return (
-        this.wwEditorState.editMode === wwLib.wwEditorHelper.EDIT_MODES.EDITION
-      );
-      /* wwEditor:end */
-      // eslint-disable-next-line no-unreachable
-      return false;
-    },
     style() {
-      const style = { position: 'absolute' };
-      const { position, alignment } = this.content;
-      const width = this.coordinates.width + "px";
-      const height = this.coordinates.height + "px";
+      const style = {};
+      const position = this.content.position;
+      const alignment = this.content.alignment;
 
       const offsetX =
         this.content.offsetX !== undefined ? this.content.offsetX : "0px";
       const offsetY =
         this.content.offsetY !== undefined ? this.content.offsetY : "0px";
 
-
       switch (position) {
         case "top":
-          style["bottom"] = `calc(100% - ${this.triggerOffsets.bottom}px + ${height} + ${offsetY})`;
+          style[
+            "bottom"
+          ] = `calc(100% - ${this.triggerBox.bottom}px + ${this.triggerBox.height}px + ${offsetY})`;
           break;
         case "bottom":
-          style["top"] = `calc(${this.triggerOffsets.top}px + ${height} + ${offsetY})`;
+          style[
+            "top"
+          ] = `calc(${this.triggerBox.top}px + ${this.triggerBox.height}px + ${offsetY})`;
           break;
         case "left":
-          style["right"] = `calc(100% - ${this.triggerOffsets.right}px + ${width} + ${offsetX})`;
+          style[
+            "right"
+          ] = `calc(100% - ${this.triggerBox.right}px + ${this.triggerBox.width}px + ${offsetX})`;
           break;
         case "right":
-          style["left"] = `calc(${this.triggerOffsets.left}px + ${width} + ${offsetX})`;
+          style[
+            "left"
+          ] = `calc(${this.triggerBox.left}px + ${this.triggerBox.width}px + ${offsetX})`;
           break;
       }
 
@@ -130,14 +251,14 @@ export default {
               style["--transformOrigin"] =
                 this.getOppositeSide(position) + " left";
             }
-            style["left"] = `calc(${offsetX} + ${this.triggerOffsets.left}px)`;
+            style["left"] = `calc(${offsetX} + ${this.triggerBox.left}px)`;
             style["--slideOriginX"] = "-" + offsetX;
           } else {
             if (this.content.animated) {
               style["--transformOrigin"] =
                 "top " + this.getOppositeSide(position);
             }
-            style["top"] = `calc(${this.triggerOffsets.top}px + ${offsetY})`;
+            style["top"] = `calc(${this.triggerBox.top}px + ${offsetY})`;
           }
           break;
         case "center":
@@ -146,23 +267,23 @@ export default {
               style["--transformOrigin"] =
                 this.getOppositeSide(position) + " center";
             }
-            style["left"] = `calc(${offsetX} + ${this.triggerOffsets.left}px)`;
+            style["left"] = `calc(${offsetX} + ${this.triggerBox.left}px)`;
             style[
               "transform"
-            ] = `translateX( calc(-50% + (${width} / 2) + ${offsetX}))`;
+            ] = `translateX( calc(-50% + (${this.triggerBox.width}px / 2) + ${offsetX}))`;
             style["--slideOriginX"] = `0px`;
           } else {
             if (this.content.animated) {
               style["--transformOrigin"] =
                 "center " + this.getOppositeSide(position);
             }
-            style["top"] = `calc(${this.triggerOffsets.top}px + ${offsetY})`;
+            style["top"] = `calc(${this.triggerBox.top}px + ${offsetY})`;
             style[
               "transform"
-            ] = `translateY(calc(-50% + (${height} / 2) + ${offsetY}))`;
+            ] = `translateY(calc(-50% + (${this.triggerBox.height}px / 2) + ${offsetY}))`;
             style[
               "--slideOriginY"
-            ] = `calc(-0.5 * ((${width} / 2) + ${offsetX}))`;
+            ] = `calc(-0.5 * ((${this.triggerBox.width}px / 2) + ${offsetX}))`;
           }
           break;
         case "end":
@@ -170,46 +291,29 @@ export default {
             if (this.content.animated) {
               style["--transformOrigin"] = "center";
             }
-            style["right"] = `calc(100% - ${this.triggerOffsets.right}px + ${offsetX})`;
+            style[
+              "right"
+            ] = `calc(100% - ${this.triggerBox.right}px + ${offsetX})`;
             style["--slideOriginX"] = offsetX;
           } else {
             if (this.content.animated) {
               style["--transformOrigin"] =
                 "bottom " + this.getOppositeSide(position);
             }
-            style["bottom"] = `calc(100% - ${this.triggerOffsets.bottom}px + ${offsetY})`;
+            style[
+              "bottom"
+            ] = `calc(100% - ${this.triggerBox.bottom}px + ${offsetY})`;
           }
           break;
       }
 
       style["z-index"] = this.content.dropdownZIndex || "unset";
 
-      style.pointerEvents = this.isDisplayed ? "none" : "auto";
-
       return style;
     },
-    isDisplayed() {
-      return (
-        this.isOpened || (this.content.forceDisplayEditor && this.isEditing)
-      );
-    },
-  },
-  beforeMount() {
-    wwLib.getFrontDocument().addEventListener("click", this.handleClickOutside);
-  },
-  mounted() {
-    this.resizeObserver = new ResizeObserver(this.handleResize);
-    const containerElement = this.$refs.dropdownElement;
-    this.resizeObserver.observe(containerElement);
   },
   unmounted() {
     clearTimeout(this.timeoutId);
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
-    wwLib
-      .getFrontDocument()
-      .removeEventListener("click", this.handleClickOutside);
   },
   methods: {
     handleClick() {
@@ -223,16 +327,6 @@ export default {
     closeDropdown() {
       this.isOpened = false;
     },
-    handleClickOutside() {
-      if (
-        !this.isMouseInside &&
-        (this.content.triggerType === "click" ||
-          this.content.triggerType === "right-click" ||
-          this.wwFrontState.screenSize !== "default")
-      ) {
-        if (!this.content.disabled) this.isOpened = false;
-      }
-    },
     handleHoverIn() {
       if (
         this.content.triggerType === "hover" &&
@@ -241,8 +335,6 @@ export default {
       ) {
         clearTimeout(this.timeoutId);
         if (!this.content.disabled) this.isOpened = true;
-      } else {
-        this.isMouseInside = true;
       }
     },
     handleHoverOut() {
@@ -250,8 +342,6 @@ export default {
         this.timeoutId = setTimeout(() => {
           if (!this.content.disabled) this.isOpened = false;
         }, 200);
-      } else {
-        this.isMouseInside = false;
       }
     },
     handleRightClick() {
@@ -272,25 +362,6 @@ export default {
 
       return transformations[side];
     },
-    handleResize(entries) {
-      const entry = entries[0];
-      this.coordinates.width = entry.contentRect.width;
-      this.coordinates.height = entry.contentRect.height;
-    },
-  },
-  watch: {
-    isDisplayed(value) {
-      if (value) {
-        this.$nextTick(() => {
-          this.syncOffsets();
-        });
-      }
-    },
-    isEditing() {
-      this.$nextTick(() => {
-        this.syncOffsets();
-      });
-    },
   },
 };
 </script>
@@ -303,8 +374,7 @@ export default {
 }
 
 .dropdown {
-  position: absolute;
-  // transform: translateX(-50%)
+  position: fixed;
 }
 
 .slide-enter-active,
