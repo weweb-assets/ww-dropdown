@@ -103,6 +103,7 @@ export default {
     });
     const delayedIsOpen = ref(isDisplayed.value);
     const delayedIsClosed = ref(!isDisplayed.value);
+    const timeoutId = ref(null);
 
     let resizeObserver = null;
     let scrollableParents = [];
@@ -176,14 +177,24 @@ export default {
 
     onUnmounted(() => {
       stopPositioningDropdown();
+      clearTimeout(timeoutId.value);
     });
+
+    watch(
+      () => props.content.triggerType,
+      (newValue, oldValue) => {
+        if (newValue === oldValue) return;
+        isOpened.value = false;
+        clearTimeout(timeoutId.value);
+      }
+    );
 
     return {
       appDiv,
       synchronizeTriggerBox,
       triggerBox,
       isOpened,
-      timeoutId: null,
+      timeoutId,
       isEditing,
       isDisplayed,
       delayedIsClosed,
@@ -311,9 +322,6 @@ export default {
 
       return style;
     },
-  },
-  unmounted() {
-    clearTimeout(this.timeoutId);
   },
   methods: {
     handleClick() {
