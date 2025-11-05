@@ -127,7 +127,8 @@ export default {
       wwLib.getFrontDocument().addEventListener("click", onWindowClick);
       resizeObserver = new ResizeObserver((entries) => {
         const entry = entries[0];
-        triggerBox.value.width = entry.contentRect;
+        triggerBox.value.width = entry.contentRect.width;
+        triggerBox.value.height = entry.contentRect.height;
       });
       resizeObserver.observe(triggerElementRef.value);
       setScrollableParents(triggerElementRef.value);
@@ -397,3 +398,4 @@ export default {
   transform: translate(var(--slideOriginX), var(--slideOriginY)) scale(0.1);
 }
 </style>
+
