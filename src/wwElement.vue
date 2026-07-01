@@ -93,6 +93,8 @@ export default {
     });
 
     const triggerBox = ref({});
+    const resolvedPosition = ref(props.content.position);
+
     const synchronizeTriggerBox = () => {
       if (!triggerElementRef?.value) return;
       const box = triggerElementRef.value.getBoundingClientRect();
@@ -104,6 +106,73 @@ export default {
         width: box.width,
         height: box.height,
       };
+      computeResolvedPosition();
+    };
+
+    const computeResolvedPosition = () => {
+      const position = props.content.position;
+      const box = triggerBox.value;
+      if (!box || box.width === undefined) {
+        resolvedPosition.value = position;
+        return;
+      }
+
+      const frontWindow = wwLib.getFrontWindow();
+      const viewportHeight = frontWindow.innerHeight;
+      const viewportWidth = frontWindow.innerWidth;
+
+      const dropdownRect = dropdownElementRef?.value?.getBoundingClientRect();
+      const dropdownHeight = dropdownRect?.height || box.height;
+      const dropdownWidth = dropdownRect?.width || box.width;
+
+      const parseOffset = (value) => {
+        const parsed = parseFloat(value);
+        return Number.isFinite(parsed) ? parsed : 0;
+      };
+      const offsetY = parseOffset(props.content.offsetY);
+      const offsetX = parseOffset(props.content.offsetX);
+
+      if (
+        props.content.autoVertical &&
+        (position === "top" || position === "bottom")
+      ) {
+        const spaceBelow = viewportHeight - box.bottom - offsetY;
+        const spaceAbove = box.top - offsetY;
+        const fitsBelow = spaceBelow >= dropdownHeight;
+        const fitsAbove = spaceAbove >= dropdownHeight;
+        if (!fitsBelow && (fitsAbove || spaceAbove > spaceBelow)) {
+          resolvedPosition.value = "top";
+        } else {
+          resolvedPosition.value = "bottom";
+        }
+        return;
+      }
+
+      if (
+        props.content.autoHorizontal &&
+        (position === "left" || position === "right")
+      ) {
+        const spaceRight = viewportWidth - box.right - offsetX;
+        const spaceLeft = box.left - offsetX;
+        const fitsRight = spaceRight >= dropdownWidth;
+        const fitsLeft = spaceLeft >= dropdownWidth;
+        if (position === "right") {
+          if (!fitsRight && (fitsLeft || spaceLeft > spaceRight)) {
+            resolvedPosition.value = "left";
+          } else {
+            resolvedPosition.value = "right";
+          }
+        } else {
+          if (!fitsLeft && (fitsRight || spaceRight > spaceLeft)) {
+            resolvedPosition.value = "right";
+          } else {
+            resolvedPosition.value = "left";
+          }
+        }
+        return;
+      }
+
+      resolvedPosition.value = position;
     };
 
     function onWindowClick(event) {
@@ -189,6 +258,7 @@ export default {
         delayedIsClosed.value = false;
         nextTick(() => {
           delayedIsOpen.value = true;
+          nextTick(() => computeResolvedPosition());
         });
       } else {
         stopPositioningDropdown();
@@ -221,10 +291,22 @@ export default {
       }
     );
 
+    watch(
+      () => [
+        props.content.position,
+        props.content.autoVertical,
+        props.content.autoHorizontal,
+      ],
+      () => {
+        computeResolvedPosition();
+      }
+    );
+
     return {
       appDiv,
       synchronizeTriggerBox,
       triggerBox,
+      resolvedPosition,
       isOpened,
       timeoutId,
       isEditing,
@@ -237,7 +319,7 @@ export default {
   computed: {
     style() {
       const style = {};
-      const position = this.content.position;
+      const position = this.resolvedPosition;
       const alignment = this.content.alignment;
 
       const offsetX =
