@@ -135,6 +135,7 @@ export default {
     const delayedIsOpen = ref(isDisplayed.value);
     const delayedIsClosed = ref(!isDisplayed.value);
     const timeoutId = ref(null);
+    let unmountTimeoutId = null;
 
     let resizeObserver = null;
     let scrollableParents = [];
@@ -185,6 +186,7 @@ export default {
 
     watch(isDisplayed, (isDisplayed) => {
       if (isDisplayed) {
+        clearTimeout(unmountTimeoutId);
         startPositioningDropdown();
         delayedIsClosed.value = false;
         nextTick(() => {
@@ -194,8 +196,8 @@ export default {
         stopPositioningDropdown();
         delayedIsOpen.value = false;
         nextTick(() => {
-          setTimeout(() => {
-            delayedIsClosed.value = true;
+          unmountTimeoutId = setTimeout(() => {
+            if (!isDisplayed.value) delayedIsClosed.value = true;
           }, 250);
         });
       }
@@ -210,6 +212,7 @@ export default {
     onUnmounted(() => {
       stopPositioningDropdown();
       clearTimeout(timeoutId.value);
+      clearTimeout(unmountTimeoutId);
     });
 
     watch(
