@@ -121,16 +121,38 @@ export default {
       const viewportHeight = frontWindow.innerHeight;
       const viewportWidth = frontWindow.innerWidth;
 
-      const dropdownRect = dropdownElementRef?.value?.getBoundingClientRect();
-      const dropdownHeight = dropdownRect?.height || box.height;
-      const dropdownWidth = dropdownRect?.width || box.width;
+      const dropdownElement = dropdownElementRef?.value;
+      if (!dropdownElement) {
+        resolvedPosition.value = position;
+        return;
+      }
 
-      const parseOffset = (value) => {
-        const parsed = parseFloat(value);
-        return Number.isFinite(parsed) ? parsed : 0;
+      const dropdownHeight = dropdownElement.offsetHeight || box.height;
+      const dropdownWidth = dropdownElement.offsetWidth || box.width;
+      const computedStyle = frontWindow.getComputedStyle(dropdownElement);
+      const renderedPosition = resolvedPosition.value;
+
+      const getRenderedOffset = (property, reference) => {
+        const value = Number.parseFloat(computedStyle[property]);
+        return Number.isFinite(value) ? value - reference : 0;
       };
-      const offsetY = parseOffset(props.content.offsetY);
-      const offsetX = parseOffset(props.content.offsetX);
+
+      let offsetY = 0;
+      let offsetX = 0;
+      switch (renderedPosition) {
+        case "top":
+          offsetY = getRenderedOffset("bottom", viewportHeight - box.top);
+          break;
+        case "bottom":
+          offsetY = getRenderedOffset("top", box.bottom);
+          break;
+        case "left":
+          offsetX = getRenderedOffset("right", viewportWidth - box.left);
+          break;
+        case "right":
+          offsetX = getRenderedOffset("left", box.right);
+          break;
+      }
 
       if (
         props.content.autoVertical &&
@@ -222,15 +244,17 @@ export default {
       scrollableParents.push(wwLib.getFrontWindow());
     }
 
+    function observeDropdownSize() {
+      if (!resizeObserver || !dropdownElementRef.value) return;
+      resizeObserver.observe(dropdownElementRef.value);
+    }
+
     function startPositioningDropdown() {
       synchronizeTriggerBox();
       wwLib.getFrontDocument().addEventListener("click", onWindowClick);
-      resizeObserver = new ResizeObserver((entries) => {
-        const entry = entries[0];
-        triggerBox.value.width = entry.contentRect.width;
-        triggerBox.value.height = entry.contentRect.height;
-      });
+      resizeObserver = new ResizeObserver(synchronizeTriggerBox);
       resizeObserver.observe(triggerElementRef.value);
+      observeDropdownSize();
       setScrollableParents(triggerElementRef.value);
       scrollableParents.forEach((p) => {
         p.addEventListener("scroll", synchronizeTriggerBox, { passive: true });
@@ -243,6 +267,7 @@ export default {
     function stopPositioningDropdown() {
       wwLib.getFrontDocument().removeEventListener("click", onWindowClick);
       resizeObserver?.disconnect();
+      resizeObserver = null;
       scrollableParents.forEach((p) => {
         p.removeEventListener("scroll", synchronizeTriggerBox);
         wwLib
@@ -258,7 +283,11 @@ export default {
         delayedIsClosed.value = false;
         nextTick(() => {
           delayedIsOpen.value = true;
-          nextTick(() => computeResolvedPosition());
+          nextTick(() => {
+            if (!isDisplayed.value) return;
+            observeDropdownSize();
+            computeResolvedPosition();
+          });
         });
       } else {
         stopPositioningDropdown();
@@ -296,9 +325,14 @@ export default {
         props.content.position,
         props.content.autoVertical,
         props.content.autoHorizontal,
+        props.content.offsetX,
+        props.content.offsetY,
       ],
-      () => {
-        computeResolvedPosition();
+      ([position], [previousPosition]) => {
+        if (position !== previousPosition) {
+          resolvedPosition.value = position;
+        }
+        nextTick(() => computeResolvedPosition());
       }
     );
 
