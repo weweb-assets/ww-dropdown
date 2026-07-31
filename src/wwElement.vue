@@ -184,8 +184,8 @@ export default {
       scrollableParents = [];
     }
 
-    watch(isDisplayed, (isDisplayed) => {
-      if (isDisplayed) {
+    watch(isDisplayed, (displayed) => {
+      if (displayed) {
         clearTimeout(unmountTimeoutId);
         startPositioningDropdown();
         delayedIsClosed.value = false;
