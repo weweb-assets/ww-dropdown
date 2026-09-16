@@ -162,10 +162,18 @@ export default {
         const spaceAbove = box.top - offsetY;
         const fitsBelow = spaceBelow >= dropdownHeight;
         const fitsAbove = spaceAbove >= dropdownHeight;
-        if (!fitsBelow && (fitsAbove || spaceAbove > spaceBelow)) {
-          resolvedPosition.value = "top";
+        if (position === "bottom") {
+          if (!fitsBelow && (fitsAbove || spaceAbove > spaceBelow)) {
+            resolvedPosition.value = "top";
+          } else {
+            resolvedPosition.value = "bottom";
+          }
         } else {
-          resolvedPosition.value = "bottom";
+          if (!fitsAbove && (fitsBelow || spaceBelow > spaceAbove)) {
+            resolvedPosition.value = "bottom";
+          } else {
+            resolvedPosition.value = "top";
+          }
         }
         return;
       }

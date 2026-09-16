@@ -66,7 +66,7 @@ export default {
       /* wwEditor:start */
       bindingValidation: {
         type: "boolean",
-        tooltip: "A boolean that, when true, flips a top/bottom dropdown to the opposite side when it would overflow the viewport (bottom by default, flips to top near the bottom edge).",
+        tooltip: "A boolean that, when true, flips a top/bottom dropdown to the opposite side when it would overflow the viewport (near the top or bottom edge).",
       },
       /* wwEditor:end */
     },
