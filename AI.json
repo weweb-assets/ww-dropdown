@@ -114,7 +114,8 @@
         "Nested dropdowns are supported: clicking inside a child dropdown won't close parent dropdowns.",
         "forceDisplayEditor only affects editor mode preview and has no effect in production.",
         "Does not support programmatic open — only the closeDropdown action is available.",
-        "Does not support custom transition durations or easing; animation timing is fixed."
+        "Does not support custom transition durations or easing; animation timing is fixed.",
+        "ww-dropdown is a floating contextual menu/panel opened by click or hover, not a form input. To let the user SELECT A VALUE from a list (combobox, select, or multi-select), use ww-input-select instead."
     ],
     "examples": [
         {
