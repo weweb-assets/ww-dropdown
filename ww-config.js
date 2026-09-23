@@ -49,10 +49,40 @@ export default {
       classes: true,
       states: true,
       responsive: true,
+      /* wwEditor:start */
       bindingValidation: {
         type: 'string',
-        tooltip: 'A string that defines the position of the dropdown. Possible values are top, right, bottom, and left.',
-      }
+        tooltip: 'A string that defines the position of the dropdown. Possible values are top, right, bottom, and left. Bind it to drive the opening direction from a formula (e.g. the trigger position on the page).',
+      },
+      /* wwEditor:end */
+    },
+    autoVertical: {
+      type: "OnOff",
+      label: {
+        en: "Auto vertical",
+      },
+      defaultValue: false,
+      bindable: true,
+      /* wwEditor:start */
+      bindingValidation: {
+        type: "boolean",
+        tooltip: "A boolean that, when true, flips a top/bottom dropdown to the opposite side when it would overflow the viewport (near the top or bottom edge).",
+      },
+      /* wwEditor:end */
+    },
+    autoHorizontal: {
+      type: "OnOff",
+      label: {
+        en: "Auto horizontal",
+      },
+      defaultValue: false,
+      bindable: true,
+      /* wwEditor:start */
+      bindingValidation: {
+        type: "boolean",
+        tooltip: "A boolean that, when true, flips a left/right dropdown to the opposite side when it would overflow the viewport (near the left or right edge).",
+      },
+      /* wwEditor:end */
     },
     alignment: {
       label: { en: "Align" },

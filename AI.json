@@ -12,6 +12,7 @@
         "features": [
             "Click, hover, or right-click trigger modes",
             "Configurable position (top, right, bottom, left) and alignment (start, center, end)",
+            "Bindable position, and optional auto flip (autoVertical / autoHorizontal) when the dropdown would overflow the viewport",
             "Customizable X and Y offsets in px or %",
             "Optional slide animation with transform origin based on position",
             "Nested dropdown support",
@@ -32,11 +33,23 @@
         },
         {
             "name": "position",
-            "description": "Position of the dropdown relative to the trigger element.",
+            "description": "Position of the dropdown relative to the trigger element. Bindable, so it can be driven by a formula. When autoVertical or autoHorizontal is enabled, this is the preferred position and the dropdown flips to the opposite side if it would overflow the viewport.",
             "type": "string",
             "options": ["top", "right", "bottom", "left"],
             "defaultValue": "bottom",
             "responsive": true
+        },
+        {
+            "name": "autoVertical",
+            "description": "When true and position is 'top' or 'bottom', the dropdown automatically flips to the opposite vertical side when it would overflow the viewport (e.g. a 'bottom' dropdown opens upward near the bottom edge). Falls back to the side with the most space when it fits on neither.",
+            "type": "boolean",
+            "defaultValue": false
+        },
+        {
+            "name": "autoHorizontal",
+            "description": "When true and position is 'left' or 'right', the dropdown automatically flips to the opposite horizontal side when it would overflow the viewport. Falls back to the side with the most space when it fits on neither.",
+            "type": "boolean",
+            "defaultValue": false
         },
         {
             "name": "alignment",
@@ -110,6 +123,8 @@
         "The dropdown is teleported to the app root to avoid overflow clipping from parent containers.",
         "On mobile screen sizes, hover trigger type automatically falls back to click behavior.",
         "The dropdown auto-closes when clicking outside of both the trigger and dropdown areas.",
+        "autoVertical / autoHorizontal only apply when the configured position is on the matching axis (top/bottom for autoVertical, left/right for autoHorizontal); the flip is recomputed on scroll, on trigger or dropdown resize, and when position, the auto flags, or offsets change.",
+        "Auto flip accounts for the configured offsets when measuring available space, and always keeps the configured position when it fits.",
         "When animated is true, the dropdown uses a slide + scale transition with transform origin based on position and alignment.",
         "Nested dropdowns are supported: clicking inside a child dropdown won't close parent dropdowns.",
         "forceDisplayEditor only affects editor mode preview and has no effect in production.",
