@@ -48,6 +48,7 @@ export default {
     wwEditorState: { type: Object, required: true },
     /* wwEditor:end */
   },
+  emits: ["update:sidepanel-content"],
   data() {
     return {
       dropdownSize: 0,
@@ -60,6 +61,12 @@ export default {
       return props.wwEditorState.isEditing;
       /* wwEditor:end */
       // eslint-disable-next-line no-unreachable
+      return false;
+    });
+    const forceOpenInEditor = computed(() => {
+      /* wwEditor:start */
+      return props.wwEditorState.sidepanelContent.forceOpenInEditor;
+      /* wwEditor:end */
       return false;
     });
     const triggerElementRef = useTemplateRef("triggerElement");
@@ -129,7 +136,7 @@ export default {
     const isOpened = ref(false);
     const isDisplayed = computed(() => {
       return (
-        isOpened.value || (props.content.forceDisplayEditor && isEditing.value)
+        isOpened.value || (forceOpenInEditor.value && isEditing.value)
       );
     });
     const delayedIsOpen = ref(isDisplayed.value);
@@ -231,6 +238,7 @@ export default {
       isOpened,
       timeoutId,
       isEditing,
+      forceOpenInEditor,
       isDisplayed,
       delayedIsClosed,
       delayedIsOpen,
@@ -360,6 +368,15 @@ export default {
     },
   },
   methods: {
+    /* wwEditor:start */
+    toggleForceOpenInEditor() {
+      if (!this.isEditing) return;
+      this.$emit("update:sidepanel-content", {
+        path: "forceOpenInEditor",
+        value: !this.forceOpenInEditor,
+      });
+    },
+    /* wwEditor:end */
     handleClick() {
       if (
         this.content.triggerType === "click" ||
