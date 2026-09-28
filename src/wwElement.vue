@@ -106,7 +106,8 @@ export default {
         width: box.width,
         height: box.height,
       };
-      computeResolvedPosition();
+      // Read the rendered offset only after Vue applies the new trigger coordinates.
+      nextTick(computeResolvedPosition);
     };
 
     const computeResolvedPosition = () => {
@@ -285,8 +286,8 @@ export default {
       scrollableParents = [];
     }
 
-    watch(isDisplayed, (isDisplayed) => {
-      if (isDisplayed) {
+    watch(isDisplayed, (displayed) => {
+      if (displayed) {
         startPositioningDropdown();
         delayedIsClosed.value = false;
         nextTick(() => {
