@@ -10,6 +10,15 @@ export default {
   },
   actions: [{ label: 'Close dropdown', action: 'closeDropdown' }],
   properties: {
+    forceOpenInEditor: {
+      type: "Button",
+      editorOnly: true,
+      defaultValue: false,
+      options: (_, sidepanelContent) => ({
+        text: { en: sidepanelContent.forceOpenInEditor ? "Close in editor" : "Open in editor" },
+        action: "toggleForceOpenInEditor",
+      }),
+    },
     triggerType: {
       label: {
         en: "Trigger",
@@ -199,12 +208,6 @@ export default {
         tooltip: "A boolean that defines whether element is animated",
       },
       /* wwEditor:end */
-    },
-    forceDisplayEditor: {
-      type: "OnOff",
-      label: {
-        en: "Force display in editor",
-      }
     },
   },
 };
