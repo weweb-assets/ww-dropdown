@@ -216,6 +216,15 @@ export default {
     });
 
     watch(
+      () => props.content?.disabled,
+      (disabled) => {
+        if (!disabled) return;
+        isOpened.value = false;
+        clearTimeout(timeoutId.value);
+      }
+    );
+
+    watch(
       () => props.content.triggerType,
       (newValue, oldValue) => {
         if (newValue === oldValue) return;
