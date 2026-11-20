@@ -75,12 +75,6 @@
             "description": "When true, enables a slide/scale animation when the dropdown opens and closes.",
             "type": "boolean",
             "defaultValue": false
-        },
-        {
-            "name": "forceDisplayEditor",
-            "description": "When true, forces the dropdown to be displayed in editor mode for design purposes.",
-            "type": "boolean",
-            "defaultValue": false
         }
     ],
     "states": [],
@@ -112,14 +106,13 @@
         "The dropdown auto-closes when clicking outside of both the trigger and dropdown areas.",
         "When animated is true, the dropdown uses a slide + scale transition with transform origin based on position and alignment.",
         "Nested dropdowns are supported: clicking inside a child dropdown won't close parent dropdowns.",
-        "forceDisplayEditor only affects editor mode preview and has no effect in production.",
         "Does not support programmatic open — only the closeDropdown action is available.",
         "Does not support custom transition durations or easing; animation timing is fixed."
     ],
     "examples": [
         {
             "description": "A simple click-triggered dropdown menu positioned below the trigger with a button as trigger and a list of items.",
-            "example": "{\"triggerType\":\"click\",\"position\":\"bottom\",\"alignment\":\"start\",\"offsetY\":\"8px\",\"animated\":true,\"forceDisplayEditor\":true}"
+            "example": "{\"triggerType\":\"click\",\"position\":\"bottom\",\"alignment\":\"start\",\"offsetY\":\"8px\",\"animated\":true}"
         },
         {
             "description": "A hover-triggered dropdown positioned to the right, centered alignment.",

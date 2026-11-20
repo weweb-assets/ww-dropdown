@@ -48,18 +48,25 @@ export default {
     wwEditorState: { type: Object, required: true },
     /* wwEditor:end */
   },
+  emits: ["update:sidepanel-content"],
   data() {
     return {
       dropdownSize: 0,
     };
   },
-  setup(props) {
+  setup(props, { emit }) {
     const appDiv = wwLib.getFrontDocument().querySelector("#app");
     const isEditing = computed(() => {
       /* wwEditor:start */
       return props.wwEditorState.isEditing;
       /* wwEditor:end */
       // eslint-disable-next-line no-unreachable
+      return false;
+    });
+    const forceOpenInEditor = computed(() => {
+      /* wwEditor:start */
+      return props.wwEditorState.sidepanelContent.forceOpenInEditor;
+      /* wwEditor:end */
       return false;
     });
     const triggerElementRef = useTemplateRef("triggerElement");
@@ -129,13 +136,43 @@ export default {
     const isOpened = ref(false);
     const isDisplayed = computed(() => {
       return (
-        isOpened.value || (props.content.forceDisplayEditor && isEditing.value)
+        isOpened.value || (isEditing.value && Boolean(forceOpenInEditor.value))
       );
     });
     const delayedIsOpen = ref(isDisplayed.value);
     const delayedIsClosed = ref(!isDisplayed.value);
     const timeoutId = ref(null);
     let unmountTimeoutId = null;
+
+    /* wwEditor:start */
+    watch(isEditing, () => {
+      clearTimeout(timeoutId.value);
+      isOpened.value = false;
+    });
+    const elementUid = inject("_wwElementUid", null);
+    const componentId = inject("_wwElementComponentId", null);
+    const isSelectedInEditor = computed(() => {
+      if (!props.wwEditorState.canBeEdited || !props.wwEditorState.isSingleSelected) return false;
+      if (props.wwEditorState.isExactlySelected) return true;
+      const selection = wwLib.editorSelectionStore.selectedComponent.value;
+      if (selection?.type !== "element" || selection.uid !== elementUid || selection.componentId) return false;
+      // The Navigator selects by UID. Its button targets the first registered instance.
+      const instances = wwLib.globalVariables.componentLocalInformation.get(elementUid);
+      return Object.keys(instances || {})[0] === `${componentId}`;
+    });
+    watch(
+      [isDisplayed, isSelectedInEditor],
+      ([displayed, isSelected]) => {
+        if (!isSelected) return;
+        if (props.wwEditorState.sidepanelContent.isOpenInEditor === displayed) return;
+        emit("update:sidepanel-content", {
+          path: "isOpenInEditor",
+          value: displayed,
+        });
+      },
+      { immediate: true }
+    );
+    /* wwEditor:end */
 
     let resizeObserver = null;
     let scrollableParents = [];
@@ -360,6 +397,17 @@ export default {
     },
   },
   methods: {
+    /* wwEditor:start */
+    toggleForceOpenInEditor() {
+      if (!this.isEditing) return;
+      const shouldOpen = !this.isDisplayed;
+      if (!shouldOpen) this.closeDropdown();
+      this.$emit("update:sidepanel-content", {
+        path: "forceOpenInEditor",
+        value: shouldOpen,
+      });
+    },
+    /* wwEditor:end */
     handleClick() {
       if (
         this.content.triggerType === "click" ||
