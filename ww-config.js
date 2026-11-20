@@ -15,9 +15,14 @@ export default {
       editorOnly: true,
       defaultValue: false,
       options: (_, sidepanelContent) => ({
-        text: { en: sidepanelContent.forceOpenInEditor ? "Close in editor" : "Open in editor" },
+        text: { en: sidepanelContent.isOpenInEditor ? "Close in editor" : "Open in editor" },
         action: "toggleForceOpenInEditor",
       }),
+    },
+    isOpenInEditor: {
+      editorOnly: true,
+      hidden: true,
+      defaultValue: false,
     },
     triggerType: {
       label: {
